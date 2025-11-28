@@ -50,7 +50,7 @@ const AQI_API_URL = `https://api.openweathermap.org/data/2.5/air_pollution?lat=$
 
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const apiUrl = (isLocal ? "http://localhost:5001" : (import.meta.env.VITE_API_URL || "http://localhost:5001")).replace(/\/$/, "");
-
+const WEATHERAPI_KEY = "b81378cf6cb84db5b41230215252811";
 interface Hospital {
   name: string;
   city: string;
@@ -593,11 +593,150 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-4 py-8 relative z-10">
+       {/* Main Content */}
+        <div className="container mx-auto px-4 py-8">
+
+
+
+          {/* Key Metrics Grid with Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <DashboardCard metric={{ id: "icu", label: t("icu_beds_occupied"), value: 847, unit: t("beds"), trend: 2.5, status: "warning", icon: <Users className="w-5 h-5 text-warning" /> }} />
-            <DashboardCard metric={{ id: "oxygen", label: t("oxygen_in_stock"), value: "4,250", unit: "L", trend: -1.2, status: "success", icon: <Cylinder className="w-5 h-5 text-success" /> }} />
-            <DashboardCard metric={{ id: "deliveries", label: t("active_deliveries"), value: 34, unit: t("shipments"), trend: 5.4, status: "success", icon: <Truck className="w-5 h-5 text-success" /> }} />
+            {/* ICU Beds - Radial Bar Chart */}
+            <div className="stat-card hover:border-primary/50 transition-all p-4 rounded-xl border border-border bg-card">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {t("icu_beds_occupied")}
+                </h3>
+                <div className="p-2 rounded-lg bg-warning/10">
+                  <Users className="w-5 h-5 text-warning" />
+                </div>
+              </div>
+              <div className="h-[200px] w-full relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadialBarChart
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="60%"
+                    outerRadius="100%"
+                    barSize={15}
+                    data={icuData}
+                    startAngle={180}
+                    endAngle={0}
+                  >
+                    <RadialBar
+                      background
+                      dataKey="value"
+                      cornerRadius={10}
+                    />
+                    <text
+                      x="50%"
+                      y="50%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-foreground text-2xl font-bold"
+                    >
+                      847
+                    </text>
+                    <text
+                      x="50%"
+                      y="65%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-muted-foreground text-xs"
+                    >
+                      {t("beds")}
+                    </text>
+                  </RadialBarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Oxygen Stock - Gradient Area Chart */}
+            <div className="stat-card hover:border-primary/50 transition-all p-4 rounded-xl border border-border bg-card">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {t("oxygen_in_stock")}
+                </h3>
+                <div className="p-2 rounded-lg bg-success/10">
+                  <Cylinder className="w-5 h-5 text-success" />
+                </div>
+              </div>
+              <div className="h-[200px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={oxygenData}>
+                    <defs>
+                      <linearGradient id="colorOxygen" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
+                      itemStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#22c55e"
+                      fillOpacity={1}
+                      fill="url(#colorOxygen)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Active Deliveries - Donut Chart */}
+            <div className="stat-card hover:border-primary/50 transition-all p-4 rounded-xl border border-border bg-card">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {t("active_deliveries")}
+                </h3>
+                <div className="p-2 rounded-lg bg-success/10">
+                  <Truck className="w-5 h-5 text-success" />
+                </div>
+              </div>
+              <div className="h-[200px] w-full relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={deliveryData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {deliveryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
+                      itemStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <text
+                      x="50%"
+                      y="50%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-foreground text-2xl font-bold"
+                    >
+                      34
+                    </text>
+                    <text
+                      x="50%"
+                      y="65%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-muted-foreground text-xs"
+                    >
+                      {t("shipments")}
+                    </text>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
 
           <div className="mb-8"><OptimizationPanel /></div>
