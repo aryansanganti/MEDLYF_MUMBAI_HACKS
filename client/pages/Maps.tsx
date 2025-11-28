@@ -257,7 +257,8 @@ const Maps = () => {
         // Fetch routes for active jobs
         jobs.forEach(async (job) => {
             if (job.status === 'ASSIGNED' || job.status === 'EN_ROUTE') {
-                const vehicle = vehicles.find(v => v._id === job.vehicleId?._id);
+                const vId = typeof job.vehicleId === 'string' ? job.vehicleId : job.vehicleId?._id;
+                const vehicle = vehicles.find(v => v._id === vId);
                 const hospital = hospitals.find(h => h._id === job.hospitalId);
 
                 if (vehicle && hospital && !jobRoutes[job._id]) {
