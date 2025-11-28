@@ -24,7 +24,6 @@ export const Layout = ({
     ? [
       { label: "Dashboard", path: "/dashboard" },
       { label: "Reports", path: "/reports" },
-      { label: "Settings", path: "/settings" },
       { label: "Maps", path: "/maps" },
     ]
     : [];
