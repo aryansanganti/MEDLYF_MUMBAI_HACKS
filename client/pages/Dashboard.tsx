@@ -33,6 +33,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import OptimizationPanel from "./Optimization";
 
 // --- AQI API Constants ---
 // NOTE: ⚠️ REPLACE 'YOUR_ACTUAL_OPENWEATHERMAP_API_KEY' with your real key.
@@ -371,37 +372,7 @@ export default function Dashboard() {
     );
   }
 
-  // List of primary metrics, including AQI if available
-  const primaryMetrics: DashboardMetric[] = [
-    ...(aqiData ? [aqiData] : []), // AQI Metric comes first
-    {
-      id: "icu_summary",
-      label: t("icu_beds_occupied") || "ICU Beds Occupied",
-      value: 847,
-      unit: t("beds") || "beds",
-      trend: 4.2,
-      status: "warning",
-      icon: <Users className="w-5 h-5 text-warning" />,
-    },
-    {
-      id: "oxygen_summary",
-      label: t("oxygen_in_stock") || "Oxygen In Stock",
-      value: "5,620",
-      unit: t("cylinders") || "cylinders",
-      trend: 7.1,
-      status: "success",
-      icon: <Activity className="w-5 h-5 text-success" />,
-    },
-    {
-      id: "deliveries_summary",
-      label: t("active_deliveries") || "Active Deliveries",
-      value: 34,
-      unit: t("shipments") || "shipments",
-      trend: 1.5,
-      status: "neutral",
-      icon: <Truck className="w-5 h-5 text-neutral" />,
-    },
-  ];
+
 
 
   // Mock Data for Charts
@@ -500,6 +471,19 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center gap-3 flex-wrap">
+                {/* AQI Display in Header */}
+                {aqiData && (
+                  <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${aqiData.status === 'success' ? 'bg-success/10 border-success/20 text-success' :
+                    aqiData.status === 'warning' ? 'bg-warning/10 border-warning/20 text-warning' :
+                      aqiData.status === 'error' ? 'bg-error/10 border-error/20 text-error' :
+                        'bg-muted border-border text-muted-foreground'
+                    }`}>
+                    <Cloud className="w-5 h-5" />
+                    <span className="text-sm font-semibold">AQI: {aqiData.value}</span>
+                    <span className="text-xs opacity-80 hidden sm:inline-block">({aqiData.unit.split(' ')[0]})</span>
+                  </div>
+                )}
+
                 <button
                   onClick={toggleLanguage}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium"
@@ -541,12 +525,7 @@ export default function Dashboard() {
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
 
-          {/* Key Metrics Grid (Summary Cards) - Now includes AQI */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            {primaryMetrics.map(metric => (
-              <DashboardCard key={metric.id} metric={metric} />
-            ))}
-          </div>
+
 
           {/* Key Metrics Grid with Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
@@ -689,64 +668,9 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Predictions Section */}
-          <div className="mb-8 rounded-xl border border-border p-6 bg-card">
-            <h2 className="text-xl font-bold mb-4">
-              {t("ai_predictions")}
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[
-                {
-                  day: t("tomorrow"),
-                  icuBeds: "890",
-                  oxygen: "2450",
-                  confidence: "92%",
-                },
-                {
-                  day: t("day_3"),
-                  icuBeds: "920",
-                  oxygen: "2580",
-                  confidence: "88%",
-                },
-                {
-                  day: t("day_4"),
-                  icuBeds: "850",
-                  oxygen: "2380",
-                  confidence: "85%",
-                },
-                {
-                  day: t("day_7"),
-                  icuBeds: "780",
-                  oxygen: "2200",
-                  confidence: "78%",
-                },
-              ].map((pred, i) => (
-                <div
-                  key={i}
-                  className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/20"
-                >
-                  <p className="text-sm font-semibold text-muted-foreground mb-3">
-                    {pred.day}
-                  </p>
-                  <div className="space-y-2 mb-4">
-                    <div>
-                      <p className="text-xs text-muted-foreground">ICU Beds</p>
-                      <p className="text-2xl font-bold">{pred.icuBeds}</p>
-                    </div>
-                    <div>
-                      <p className="text-xs text-muted-foreground">
-                        Oxygen (cyl/day)
-                      </p>
-                      <p className="text-2xl font-bold">{pred.oxygen}</p>
-                    </div>
-                  </div>
-                  <div className="px-2 py-1 bg-success/20 rounded text-xs font-semibold text-success inline-block">
-                    {pred.confidence} {t("confidence")}
-                  </div>
-                </div>
-              ))}
-            </div>
+          {/* Optimization & Predictions Section */}
+          <div className="mb-8">
+            <OptimizationPanel />
           </div>
 
           {/* Two Column Layout */}

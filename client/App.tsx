@@ -7,6 +7,7 @@ import Reports from "./pages/Reports";
 import Maps from "./pages/Maps";
 import NotFound from "./pages/NotFound";
 import DataBaseAlert from "./pages/DataBaseAlert";
+import OptimizationPanel from "./pages/Optimization";
 
 export const App = () => (
   <Routes>
@@ -14,8 +15,9 @@ export const App = () => (
     <Route path="/login" element={<Login />} />
     <Route path="/dashboard" element={<Dashboard />} />
     <Route path="/reports" element={<Reports />} />
-    <Route path="/maps" element={<Maps/>} />
+    <Route path="/maps" element={<Maps />} />
     <Route path="/database-alert" element={<DataBaseAlert />} />
+    <Route path="/optimization" element={<OptimizationPanel />} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
