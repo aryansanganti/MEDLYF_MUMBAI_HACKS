@@ -4,13 +4,20 @@ import schedule
 import pandas as pd
 import joblib
 import certifi
+import threading  # <--- NEW: Needed to run scheduler + API together
+from flask import Flask, jsonify, request # <--- NEW: Flask imports
 from datetime import datetime
 from pymongo import MongoClient
 from huggingface_hub import snapshot_download
 from prophet import Prophet
 
 # ============================================
-# 1. CONFIGURATION
+# 1. FLASK SETUP
+# ============================================
+app = Flask(__name__)
+
+# ============================================
+# 2. CONFIGURATION
 # ============================================
 MONGO_URI = "mongodb+srv://aryansanganti_db_user:Aryan123@medlyf.9nmqmhs.mongodb.net/?appName=Medlyf"
 DB_NAME = "test"
@@ -21,7 +28,7 @@ REPO_ID = "manubhavsar/mumbai-forecast-models"
 LOCAL_MODELS = "./models"
 
 # ============================================
-# 2. MODEL LOADER (FIXED)
+# 3. MODEL LOADER
 # ============================================
 def load_models():
     """Downloads and loads models into memory once."""
@@ -40,8 +47,6 @@ def load_models():
     prophet_models = {}
     for fname in os.listdir(LOCAL_MODELS):
         if fname.startswith("prophet_") and fname.endswith(".pkl"):
-            # --- FIX: Normalize keys by replacing hyphens and underscores with spaces ---
-            # Example: "prophet_covid-19.pkl" -> "covid 19"
             key = fname.replace("prophet_", "").replace(".pkl", "").replace("_", " ").replace("-", " ").lower()
             prophet_models[key] = joblib.load(os.path.join(LOCAL_MODELS, fname))
             
@@ -53,17 +58,15 @@ RF_MODEL, LABEL_ENCODER, PROPHET_MODELS = load_models()
 print(f"   ✅ Models Loaded: {list(PROPHET_MODELS.keys())}")
 
 # ============================================
-# 3. ANALYSIS LOGIC
+# 4. ANALYSIS LOGIC
 # ============================================
 def analyze_disease(disease_name, df):
     """Runs forecast & severity check for a single disease."""
     
     # --- Filter Data ---
-    # Normalize input name to match model keys (remove / and -)
     clean_name = disease_name.lower().replace("/", " ").replace("-", " ")
     
     if 'disease' in df.columns:
-        # Create temp column for filtering
         df['disease_clean'] = df['disease'].astype(str).str.lower().str.replace("/", " ").str.replace("-", " ")
         disease_df = df[df['disease_clean'] == clean_name].copy()
     else:
@@ -96,8 +99,6 @@ def analyze_disease(disease_name, df):
         model = next((v for k, v in PROPHET_MODELS.items() if k in clean_name), None)
     
     if not model: 
-        # Debugging aid
-        print(f"      [Debug] Could not find key '{clean_name}' in models.")
         return {"error": f"No AI model for {disease_name}"}
 
     try:
@@ -135,11 +136,10 @@ def analyze_disease(disease_name, df):
     }
 
 # ============================================
-# 4. DATABASE SAVER
+# 5. DATABASE SAVER
 # ============================================
 def save_to_mongo(data):
     try:
-        # Added certifi for Mac SSL issues
         client = MongoClient(MONGO_URI, tlsCAFile=certifi.where())
         db = client[DB_NAME]
         col = db[COLLECTION]
@@ -150,7 +150,7 @@ def save_to_mongo(data):
         print(f"   ❌ MongoDB Error: {e}")
 
 # ============================================
-# 5. THE MAIN JOB
+# 6. DAILY JOB
 # ============================================
 def run_daily_scan():
     print(f"\n⏰ Starting Daily Analysis: {datetime.now()}")
@@ -177,19 +177,66 @@ def run_daily_scan():
     print("✅ Daily Scan Complete.\n")
 
 # ============================================
-# 6. EXECUTION LOOP
+# 7. FLASK API ENDPOINTS (NEW!)
 # ============================================
-if __name__ == "__main__":
-    print("🤖 MedLyf Automation Started.")
-    
-    # 1. Run immediately
-    run_daily_scan()
-    
-    # 2. Schedule for every 24 hours
-    schedule.every(24).minutes.do(run_daily_scan)
 
-    print("⏳ Scheduler active. Running every 24 hours. (Ctrl+C to stop)")
+@app.route('/', methods=['GET'])
+def health_check():
+    return jsonify({"status": "MedLyf API Online", "models_loaded": len(PROPHET_MODELS)})
+
+@app.route('/predict', methods=['GET'])
+def predict_disease():
+    """
+    API Endpoint: Get a forecast for a specific disease.
+    Usage: GET /predict?disease=Malaria
+    """
+    disease_name = request.args.get('disease')
+    if not disease_name:
+        return jsonify({"error": "Please provide a disease parameter. Example: /predict?disease=Malaria"}), 400
+
+    try:
+        df = pd.read_csv(CSV_FILE)
+        df.columns = [c.lower().strip() for c in df.columns]
+    except Exception as e:
+        return jsonify({"error": f"Failed to load CSV: {str(e)}"}), 500
+
+    result = analyze_disease(disease_name, df)
     
+    if not result:
+        return jsonify({"error": "Disease not found or analysis failed"}), 404
+    
+    if "error" in result:
+        return jsonify(result), 400
+
+    # Optional: Save API requests to DB too?
+    # save_to_mongo(result) 
+    
+    return jsonify(result)
+
+@app.route('/trigger-scan', methods=['POST'])
+def trigger_scan():
+    """Manually trigger the daily scan via API"""
+    thread = threading.Thread(target=run_daily_scan)
+    thread.start()
+    return jsonify({"message": "Daily scan triggered in background."})
+
+# ============================================
+# 8. THREADING & EXECUTION
+# ============================================
+def run_scheduler():
+    """Runs the schedule loop in a background thread"""
+    print("⏳ Scheduler active in background.")
+    schedule.every(24).minutes.do(run_daily_scan)
     while True:
         schedule.run_pending()
         time.sleep(1)
+
+if __name__ == "__main__":
+    # 1. Start the Scheduler in a separate thread
+    scheduler_thread = threading.Thread(target=run_scheduler)
+    scheduler_thread.daemon = True # Ensures thread dies when app closes
+    scheduler_thread.start()
+
+    # 2. Start the Flask App
+    print("🌍 Starting Flask API on port 5001...")
+    app.run(host='0.0.0.0', port=5001, debug=False)
