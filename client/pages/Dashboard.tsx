@@ -19,8 +19,8 @@ import {
   Building2,
   Cylinder,
   Cloud,
-  ChevronDown, // Added for dropdown
-  Calendar,    // Added for forecast
+  ChevronDown, 
+  Calendar,    
 } from "lucide-react";
 import {
   RadialBarChart,
@@ -42,8 +42,7 @@ const WEATHERAPI_KEY = "b81378cf6cb84db5b41230215252811";
 const LATITUDE = 18.9582;
 const LONGITUDE = 72.8321;
 
-// Use 'forecast.json' to get current + next 7 days in one call
-const WEATHER_API_URL = `https://api.weatherapi.com/v1/forecast.json?key=${WEATHERAPI_KEY}&q=${LATITUDE},${LONGITUDE}&days=7&aqi=yes&alerts=no`;
+const WEATHER_API_URL = `https://api.weatherapi.com/v1/forecast.json?key=${WEATHERAPI_KEY}&q=${LATITUDE},${LONGITUDE}&days=8&aqi=yes&alerts=no`;
 
 // --- INTERFACES ---
 
@@ -76,7 +75,6 @@ interface AQIForecastDay {
 
 // --- HELPERS ---
 
-// Helper: Convert US-EPA Index (1-6) to Status Label
 const getEpaStatus = (epaIndex: number) => {
   if (epaIndex === 1) return { status: "success" as const, label: "Good" };
   if (epaIndex === 2) return { status: "neutral" as const, label: "Moderate" };
@@ -87,7 +85,6 @@ const getEpaStatus = (epaIndex: number) => {
   return { status: "neutral" as const, label: "Unknown" };
 };
 
-// Helper: Calculate Real AQI (0-500) from PM2.5
 const calculateRealAQI = (pm25: number) => {
   const c = pm25;
   if (c <= 12.0) return Math.round(((50 - 0) / (12.0 - 0)) * (c - 0) + 0);
@@ -283,12 +280,10 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [refreshTime, setRefreshTime] = useState<string>(new Date().toLocaleTimeString());
   
-  // AQI State
   const [aqiData, setAqiData] = useState<DashboardMetric | null>(null);
   const [aqiForecast, setAqiForecast] = useState<AQIForecastDay[]>([]);
   const [showAqiOverlay, setShowAqiOverlay] = useState(false);
   
-  // Ref for clicking outside the overlay
   const aqiWrapperRef = useRef<HTMLDivElement>(null);
 
   const toggleLanguage = () => {
@@ -298,7 +293,6 @@ export default function Dashboard() {
     i18n.changeLanguage(langs[nextIndex]);
   };
 
-  // Close overlay on click outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (aqiWrapperRef.current && !aqiWrapperRef.current.contains(event.target as Node)) {
@@ -333,12 +327,11 @@ export default function Dashboard() {
         icon: <Cloud className={`w-5 h-5 text-${statusInfo.status}`} />,
       });
 
-      // 2. Process Forecast Data
-      const forecastDays = data.forecast.forecastday.map((day: any) => {
-        // Note: Free plans may not have air_quality in forecast, fallback to current or simulate
+      // 2. Process Forecast Data (Starting from Tomorrow)
+      // 🟢 CHANGED: Added .slice(1) to remove "Today" from the list
+      const forecastDays = data.forecast.forecastday.slice(1).map((day: any) => {
         const fAqi = day.day.air_quality || currentAqiData;
         const fPm25 = fAqi.pm2_5 || pm2_5;
-        // Adding slight random variation for demo if falling back to current
         const variation = (Math.random() * 20) - 10;
         const fRealAQI = calculateRealAQI(Math.max(0, fPm25 + variation));
         
@@ -478,7 +471,7 @@ export default function Dashboard() {
                         <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
                           <h4 className="font-semibold text-sm flex items-center gap-2">
                             <Calendar className="w-4 h-4 text-primary" />
-                            7-Day Forecast
+                            Next 7 Days
                           </h4>
                           <span className="text-xs text-muted-foreground">Est. PM2.5</span>
                         </div>
@@ -487,7 +480,7 @@ export default function Dashboard() {
                           {aqiForecast.length > 0 ? (
                             aqiForecast.map((day, idx) => (
                               <div key={idx} className="flex items-center justify-between text-sm">
-                                <span className="w-10 font-medium text-muted-foreground">{idx === 0 ? 'Today' : day.dayName}</span>
+                                <span className="w-10 font-medium text-muted-foreground">{day.dayName}</span>
                                 
                                 <div className="flex-1 mx-3 h-2 bg-muted rounded-full overflow-hidden">
                                   <div 
