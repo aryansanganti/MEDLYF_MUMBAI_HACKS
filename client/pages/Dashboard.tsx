@@ -713,7 +713,7 @@ export default function Dashboard() {
           </div>
 
           {/* Recommendations */}
-          <div className="mt-8 rounded-xl border border-border p-6 bg-gradient-to-r from-primary/10 to-secondary/10">
+          {/* <div className="mt-8 rounded-xl border border-border p-6 bg-gradient-to-r from-primary/10 to-secondary/10">
             <h2 className="text-xl font-bold mb-4">
               {t("actionable_recommendations")}
             </h2>
@@ -750,7 +750,7 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </Layout>
