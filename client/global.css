@@ -1,0 +1,158 @@
+/** @import must precede all other statements */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /**
+   * Tailwind CSS theme - Based on #4e61b5 logo color
+   * tailwind.config.ts expects the following color variables to be expressed as HSL values.
+   * A different format will require also updating the theme in tailwind.config.ts.
+  */
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 225 25% 13%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 225 25% 13%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 225 25% 13%;
+
+    --primary: 230 37% 51%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 235 45% 65%;
+    --secondary-foreground: 225 25% 13%;
+
+    --muted: 220 13% 91%;
+    --muted-foreground: 215 16% 47%;
+
+    --accent: 225 50% 75%;
+    --accent-foreground: 225 25% 13%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 230 37% 51%;
+
+    --success: 142 71% 45%;
+    --warning: 39 89% 49%;
+    --error: 0 84.2% 60.2%;
+    --info: 230 37% 51%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 225 25% 13%;
+    --sidebar-primary: 230 37% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 235 45% 65%;
+    --sidebar-accent-foreground: 225 25% 13%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 230 37% 51%;
+  }
+
+  .dark {
+    --background: 225 25% 13%;
+    --foreground: 210 40% 98%;
+
+    --card: 225 25% 8%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 225 25% 13%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 230 37% 61%;
+    --primary-foreground: 225 25% 13%;
+
+    --secondary: 235 45% 75%;
+    --secondary-foreground: 225 25% 13%;
+
+    --muted: 225 15% 25%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 225 50% 85%;
+    --accent-foreground: 225 25% 13%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 225 15% 25%;
+    --input: 225 15% 25%;
+    --ring: 230 37% 61%;
+
+    --success: 142 71% 55%;
+    --warning: 39 89% 49%;
+    --error: 0 62.8% 30.6%;
+    --info: 230 37% 61%;
+
+    --sidebar-background: 225 25% 8%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 230 37% 61%;
+    --sidebar-primary-foreground: 225 25% 13%;
+    --sidebar-accent: 235 45% 75%;
+    --sidebar-accent-foreground: 225 25% 13%;
+    --sidebar-border: 225 15% 25%;
+    --sidebar-ring: 230 37% 61%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  :where(p, span, li, h1, h2, h3, h4, h5, h6, a, button, label, td, th) {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  pre,
+  code {
+    overflow-x: auto;
+    white-space: pre;
+  }
+}
+
+@layer components {
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent;
+  }
+
+  .card-gradient {
+    @apply bg-gradient-to-br from-primary/5 to-secondary/5;
+  }
+
+  .glass-effect {
+    @apply backdrop-blur-md bg-white/30 dark:bg-white/5;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:bg-primary/90 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:bg-secondary/90 transition-colors;
+  }
+
+  .status-badge {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .stat-card {
+    @apply flex-1 rounded-xl border border-border p-6 card-gradient;
+  }
+}

@@ -1,0 +1,242 @@
+[
+  {
+    "name": "Alex Johnson",
+    "reason": "Routine Check-up",
+    "injury": "None",
+    "condition": "Good",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T10:00:00.000Z"
+  },
+  {
+    "name": "Brenda Lee",
+    "reason": "Severe Migraine",
+    "injury": "N/A",
+    "condition": "Stable",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T10:15:00.000Z"
+  },
+  {
+    "name": "Chris Taylor",
+    "reason": "Car Accident",
+    "injury": "Broken Arm",
+    "condition": "Fair",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T10:30:00.000Z"
+  },
+  {
+    "name": "Diana Ross",
+    "reason": "High Fever",
+    "injury": "N/A",
+    "condition": "Stable",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T10:45:00.000Z"
+  },
+  {
+    "name": "Eric King",
+    "reason": "Appendicitis",
+    "injury": "None",
+    "condition": "Critical",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T11:00:00.000Z"
+  },
+  {
+    "name": "Fiona Green",
+    "reason": "Food Poisoning",
+    "injury": "N/A",
+    "condition": "Good",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T11:15:00.000Z"
+  },
+  {
+    "name": "Gary Hall",
+    "reason": "Sprained Ankle",
+    "injury": "Sprain",
+    "condition": "Good",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T11:30:00.000Z"
+  },
+  {
+    "name": "Hannah White",
+    "reason": "Chest Pain",
+    "injury": "N/A",
+    "condition": "Serious",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T11:45:00.000Z"
+  },
+  {
+    "name": "Isaac Jones",
+    "reason": "Laceration",
+    "injury": "Deep Cut",
+    "condition": "Stable",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T12:00:00.000Z"
+  },
+  {
+    "name": "Jasmine Chen",
+    "reason": "Asthma Attack",
+    "injury": "N/A",
+    "condition": "Fair",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T12:15:00.000Z"
+  },
+  {
+    "name": "Kevin Rodriguez",
+    "reason": "Stroke Symptoms",
+    "injury": "N/A",
+    "condition": "Critical",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T12:30:00.000Z"
+  },
+  {
+    "name": "Laura Mendez",
+    "reason": "Minor Burn",
+    "injury": "First Degree Burn",
+    "condition": "Good",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T12:45:00.000Z"
+  },
+  {
+    "name": "Michael Pham",
+    "reason": "Dehydration",
+    "injury": "N/A",
+    "condition": "Stable",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T13:00:00.000Z"
+  },
+  {
+    "name": "Nancy Wu",
+    "reason": "Flu Symptoms",
+    "injury": "N/A",
+    "condition": "Good",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T13:15:00.000Z"
+  },
+  {
+    "name": "Oscar Perez",
+    "reason": "Kidney Stones",
+    "injury": "N/A",
+    "condition": "Fair",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T13:30:00.000Z"
+  },
+  {
+    "name": "Pamela Scott",
+    "reason": "Pregnancy Complication",
+    "injury": "N/A",
+    "condition": "Serious",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T13:45:00.000Z"
+  },
+  {
+    "name": "Quentin Vogel",
+    "reason": "Motorcycle Crash",
+    "injury": "Multiple Fractures",
+    "condition": "Critical",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T14:00:00.000Z"
+  },
+  {
+    "name": "Rachel Adams",
+    "reason": "Sore Throat",
+    "injury": "N/A",
+    "condition": "Good",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T14:15:00.000Z"
+  },
+  {
+    "name": "Steven Bell",
+    "reason": "Heart Palpitations",
+    "injury": "N/A",
+    "condition": "Fair",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T14:30:00.000Z"
+  },
+  {
+    "name": "Tracy Cooper",
+    "reason": "Poison Ingestion",
+    "injury": "N/A",
+    "condition": "Serious",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T14:45:00.000Z"
+  },
+  {
+    "name": "Umar Khan",
+    "reason": "Routine Medication",
+    "injury": "N/A",
+    "condition": "Good",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T15:00:00.000Z"
+  },
+  {
+    "name": "Victoria Diaz",
+    "reason": "Seizure",
+    "injury": "N/A",
+    "condition": "Critical",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T15:15:00.000Z"
+  },
+  {
+    "name": "Walter Evans",
+    "reason": "Animal Bite",
+    "injury": "Dog Bite",
+    "condition": "Stable",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T15:30:00.000Z"
+  },
+  {
+    "name": "Xena Young",
+    "reason": "Hypoglycemia",
+    "injury": "N/A",
+    "condition": "Fair",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T15:45:00.000Z"
+  },
+  {
+    "name": "Yusuf Zaki",
+    "reason": "Dislocation",
+    "injury": "Shoulder",
+    "condition": "Good",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T16:00:00.000Z"
+  },
+  {
+    "name": "Zoe Miller",
+    "reason": "Allergic Reaction",
+    "injury": "Hives",
+    "condition": "Stable",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T16:15:00.000Z"
+  },
+  {
+    "name": "Aaron Paul",
+    "reason": "Intoxication",
+    "injury": "N/A",
+    "condition": "Fair",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T16:30:00.000Z"
+  },
+  {
+    "name": "Betty White",
+    "reason": "Fatigue",
+    "injury": "N/A",
+    "condition": "Good",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T16:45:00.000Z"
+  },
+  {
+    "name": "Cesar Chavez",
+    "reason": "Exposure",
+    "injury": "Hypothermia",
+    "condition": "Serious",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T17:00:00.000Z"
+  },
+  {
+    "name": "Daria Smith",
+    "reason": "Unknown Pain",
+    "injury": "N/A",
+    "condition": "Fair",
+    "alive": true,
+    "timeOfAdmit": "2025-11-27T17:15:00.000Z"
+  }
+]
