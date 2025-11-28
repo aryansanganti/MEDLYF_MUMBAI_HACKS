@@ -29,6 +29,7 @@ const hospitalsRoute = require('./routes/hospitals');
 // SERVICES (Placeholders - ensure these files exist)
 const { assignJob } = require('./services/scheduler');
 const { startSimulation, startReturnSimulation } = require('./services/tracker');
+const { runOptimizationAgent } = require('./services/optimizationAgent');
 
 /* ============================================================
    INITIALIZE APP + SOCKET SERVER
@@ -239,6 +240,45 @@ app.get("/", (req, res) => {
 
 app.get("/api/health", (req, res) => {
     res.json({ status: "ok", time: new Date().toISOString() });
+});
+
+/* ============================================================
+   OPTIMIZATION AGENT ROUTE
+============================================================ */
+/* ============================================================
+   OPTIMIZATION AGENT ROUTE
+============================================================ */
+const OptimizationPrediction = require('./models/OptimizationPrediction');
+
+// GET: Fetch the latest optimization plan from DB
+app.get('/api/optimization/plan', async (req, res) => {
+    try {
+        const latestPlan = await OptimizationPrediction.findOne().sort({ timestamp: -1 });
+        if (latestPlan) {
+            console.log("✅ Returning cached optimization plan");
+            return res.json(latestPlan);
+        }
+
+        // If no plan exists, generate one
+        console.log("🤖 No cached plan found. Generating new one...");
+        const plan = await runOptimizationAgent();
+        res.json(plan);
+    } catch (err) {
+        console.error("Agent Error:", err);
+        res.status(500).json({ error: "Agent failed to fetch plan" });
+    }
+});
+
+// POST: Force generate a new optimization plan
+app.post('/api/optimization/generate', async (req, res) => {
+    try {
+        console.log("🤖 Force generating new optimization plan...");
+        const plan = await runOptimizationAgent();
+        res.json(plan);
+    } catch (err) {
+        console.error("Agent Error:", err);
+        res.status(500).json({ error: "Agent failed to generate plan" });
+    }
 });
 
 /* ============================================================
