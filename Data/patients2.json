@@ -1,0 +1,44 @@
+[
+  {
+    "name": "David Lee",
+    "reason": "High Fever",
+    "injury": "N/A",
+    "condition": "Fair",
+    "alive": true
+  },
+  {
+    "name": "Eve Davis",
+    "reason": "Severe Migraine",
+    "injury": "N/A",
+    "condition": "Fair",
+    "alive": true
+  },
+  {
+    "name": "Frank White",
+    "reason": "Car Accident",
+    "injury": "Whiplash",
+    "condition": "Serious",
+    "alive": true
+  },
+  {
+    "name": "Grace Hall",
+    "reason": "Persistent Nausea",
+    "injury": "N/A",
+    "condition": "Good",
+    "alive": true
+  },
+  {
+    "name": "Hank Green",
+    "reason": "Minor Cut",
+    "injury": "Laceration, left hand",
+    "condition": "Good",
+    "alive": true
+  },
+  {
+    "name": "Ivy King",
+    "reason": "Allergic Reaction",
+    "injury": "Rash",
+    "condition": "Stable",
+    "alive": true
+  }
+]

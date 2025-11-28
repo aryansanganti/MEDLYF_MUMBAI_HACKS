@@ -1,0 +1,8 @@
+[build]
+  command = "cd .. && pnpm install --frozen-lockfile && pnpm --dir client build"
+  publish = "dist"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
