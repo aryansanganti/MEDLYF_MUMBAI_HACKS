@@ -98,8 +98,8 @@ export const Layout = ({
                   key={item.path}
                   to={item.path}
                   className={`block px-4 py-2 rounded-lg transition-colors ${location.pathname === item.path
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground hover:bg-muted"
+                    ? "bg-primary text-primary-foreground"
+                    : "text-foreground hover:bg-muted"
                     }`}
                   onClick={() => setMobileMenuOpen(false)}
                 >

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -43,15 +44,14 @@ const DashboardCard = ({ metric }: { metric: DashboardMetric }) => (
         {metric.label}
       </h3>
       <div
-        className={`p-2 rounded-lg ${
-          metric.status === "success"
-            ? "bg-success/10"
-            : metric.status === "warning"
-              ? "bg-warning/10"
-              : metric.status === "error"
-                ? "bg-error/10"
-                : "bg-muted"
-        }`}
+        className={`p-2 rounded-lg ${metric.status === "success"
+          ? "bg-success/10"
+          : metric.status === "warning"
+            ? "bg-warning/10"
+            : metric.status === "error"
+              ? "bg-error/10"
+              : "bg-muted"
+          }`}
       >
         {metric.icon}
       </div>
@@ -65,9 +65,8 @@ const DashboardCard = ({ metric }: { metric: DashboardMetric }) => (
         </span>
       </div>
       <div
-        className={`text-sm font-medium flex items-center gap-1 ${
-          metric.trend >= 0 ? "text-success" : "text-error"
-        }`}
+        className={`text-sm font-medium flex items-center gap-1 ${metric.trend >= 0 ? "text-success" : "text-error"
+          }`}
       >
         <TrendingUp className="w-4 h-4" />
         {metric.trend > 0 ? "+" : ""}
@@ -77,13 +76,12 @@ const DashboardCard = ({ metric }: { metric: DashboardMetric }) => (
 
     <div className="h-1 bg-muted rounded-full overflow-hidden">
       <div
-        className={`h-full ${
-          metric.status === "success"
-            ? "bg-success"
-            : metric.status === "warning"
-              ? "bg-warning"
-              : "bg-error"
-        }`}
+        className={`h-full ${metric.status === "success"
+          ? "bg-success"
+          : metric.status === "warning"
+            ? "bg-warning"
+            : "bg-error"
+          }`}
         style={{ width: "70%" }}
       ></div>
     </div>
@@ -92,13 +90,12 @@ const DashboardCard = ({ metric }: { metric: DashboardMetric }) => (
 
 const AlertItem = ({ alert }: { alert: DashboardAlert }) => (
   <div
-    className={`p-4 rounded-lg border ${
-      alert.severity === "critical"
-        ? "border-error/30 bg-error/5"
-        : alert.severity === "warning"
-          ? "border-warning/30 bg-warning/5"
-          : "border-info/30 bg-info/5"
-    }`}
+    className={`p-4 rounded-lg border ${alert.severity === "critical"
+      ? "border-error/30 bg-error/5"
+      : alert.severity === "warning"
+        ? "border-warning/30 bg-warning/5"
+        : "border-info/30 bg-info/5"
+      }`}
   >
     <div className="flex items-start gap-3">
       {alert.severity === "critical" && (
@@ -141,71 +138,79 @@ const HospitalNetworkCard = ({
   icuBeds: number;
   occupancy: number;
   oxygenLevel: number;
-}) => (
-  <div className="rounded-lg border border-border p-4 hover:border-primary/50 hover:shadow-md transition-all">
-    <div className="flex items-start justify-between mb-3">
-      <div>
-        <h4 className="font-semibold text-sm">{name}</h4>
-        <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-          <MapPin className="w-3 h-3" />
-          {city}
+}) => {
+  const { t } = useTranslation();
+  return (
+    <div className="rounded-lg border border-border p-4 hover:border-primary/50 hover:shadow-md transition-all">
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <h4 className="font-semibold text-sm">{name}</h4>
+          <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+            <MapPin className="w-3 h-3" />
+            {city}
+          </div>
+        </div>
+        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
+          <Activity className="w-5 h-5 text-primary" />
         </div>
       </div>
-      <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-        <Activity className="w-5 h-5 text-primary" />
-      </div>
-    </div>
 
-    <div className="space-y-3">
-      <div>
-        <div className="flex items-center justify-between mb-1 text-xs font-medium">
-          <span>ICU Beds: {icuBeds}</span>
-          <span className="text-muted-foreground">{occupancy}%</span>
-        </div>
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div
-            className={`h-full ${
-              occupancy > 80
+      <div className="space-y-3">
+        <div>
+          <div className="flex items-center justify-between mb-1 text-xs font-medium">
+            <span>{t("icu_beds_label")}: {icuBeds}</span>
+            <span className="text-muted-foreground">{occupancy}%</span>
+          </div>
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div
+              className={`h-full ${occupancy > 80
                 ? "bg-error"
                 : occupancy > 60
                   ? "bg-warning"
                   : "bg-success"
-            }`}
-            style={{ width: `${occupancy}%` }}
-          ></div>
+                }`}
+              style={{ width: `${occupancy}%` }}
+            ></div>
+          </div>
         </div>
-      </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-1 text-xs font-medium">
-          <span>Oxygen Level</span>
-          <span className="text-muted-foreground">{oxygenLevel}%</span>
-        </div>
-        <div className="h-2 bg-muted rounded-full overflow-hidden">
-          <div
-            className={`h-full ${
-              oxygenLevel < 30
+        <div>
+          <div className="flex items-center justify-between mb-1 text-xs font-medium">
+            <span>{t("oxygen_level_label")}</span>
+            <span className="text-muted-foreground">{oxygenLevel}%</span>
+          </div>
+          <div className="h-2 bg-muted rounded-full overflow-hidden">
+            <div
+              className={`h-full ${oxygenLevel < 30
                 ? "bg-error"
                 : oxygenLevel < 50
                   ? "bg-warning"
                   : "bg-success"
-            }`}
-            style={{ width: `${oxygenLevel}%` }}
-          ></div>
+                }`}
+              style={{ width: `${oxygenLevel}%` }}
+            ></div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 export default function Dashboard() {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const [language, setLanguage] = useState<"en" | "hi" | "es" | "local">("en");
   const [refreshTime, setRefreshTime] = useState<string>(
     new Date().toLocaleTimeString(),
   );
+
+  const toggleLanguage = () => {
+    const langs = ["en", "hi", "mr", "te"];
+    const currentIndex = langs.indexOf(i18n.language);
+    const nextIndex = (currentIndex + 1) % langs.length;
+    i18n.changeLanguage(langs[nextIndex]);
+  };
 
   useEffect(() => {
     if (!user) {
@@ -240,34 +245,34 @@ export default function Dashboard() {
   const metrics: DashboardMetric[] = [
     {
       id: "icu-beds",
-      label: "ICU Beds Occupied",
+      label: t("icu_beds_occupied"),
       value: 847,
-      unit: "beds",
+      unit: t("beds"),
       trend: 12,
       status: "warning",
       icon: <Users className="w-5 h-5 text-warning" />,
     },
     {
       id: "oxygen-demand",
-      label: "Oxygen Demand",
+      label: t("oxygen_demand"),
       value: 2340,
-      unit: "cyl/day",
+      unit: t("cyl_day"),
       trend: 8,
       status: "warning",
       icon: <Zap className="w-5 h-5 text-warning" />,
     },
     {
       id: "oxygen-stock",
-      label: "Oxygen in Stock",
+      label: t("oxygen_in_stock"),
       value: 5620,
-      unit: "cyl",
+      unit: t("cyl"),
       trend: -5,
       status: "success",
       icon: <Activity className="w-5 h-5 text-success" />,
     },
     {
       id: "resource-util",
-      label: "Resource Utilization",
+      label: t("resource_utilization"),
       value: 82,
       unit: "%",
       trend: 3,
@@ -276,16 +281,16 @@ export default function Dashboard() {
     },
     {
       id: "logistics-active",
-      label: "Active Deliveries",
+      label: t("active_deliveries"),
       value: 34,
-      unit: "shipments",
+      unit: t("shipments"),
       trend: 15,
       status: "success",
       icon: <Truck className="w-5 h-5 text-success" />,
     },
     {
       id: "forecast-accuracy",
-      label: "Forecast Accuracy",
+      label: t("forecast_accuracy"),
       value: 87,
       unit: "%",
       trend: 2,
@@ -361,50 +366,41 @@ export default function Dashboard() {
           <div className="container mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
-                <h1 className="text-3xl font-bold">Dashboard</h1>
+                <h1 className="text-3xl font-bold">{t("dashboard")}</h1>
                 <p className="text-muted-foreground mt-1">
-                  Welcome back, {user?.name}! Here's your hospital's performance
-                  overview.
+                  {t("welcome", { name: user?.name })}
                 </p>
               </div>
 
               <div className="flex items-center gap-3 flex-wrap">
                 <button
-                  onClick={() =>
-                    setLanguage(
-                      language === "en"
-                        ? "hi"
-                        : language === "hi"
-                          ? "es"
-                          : "en",
-                    )
-                  }
+                  onClick={toggleLanguage}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium"
                 >
                   <Languages className="w-4 h-4" />
-                  {language.toUpperCase()}
+                  {i18n.language.toUpperCase()}
                 </button>
 
                 <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium">
                   <RefreshCw className="w-4 h-4" />
-                  Refresh
+                  {t("refresh")}
                 </button>
 
                 <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium">
                   <Download className="w-4 h-4" />
-                  Export
+                  {t("export")}
                 </button>
 
                 <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium">
                   <Settings className="w-4 h-4" />
-                  Settings
+                  {t("settings")}
                 </button>
               </div>
             </div>
 
             <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
-              Last updated: {refreshTime}
+              {t("last_updated")}: {refreshTime}
             </div>
           </div>
         </div>
@@ -425,7 +421,7 @@ export default function Dashboard() {
               <div className="rounded-xl border border-border p-6 bg-card">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <AlertTriangle className="w-5 h-5 text-warning" />
-                  Active Alerts
+                  {t("active_alerts")}
                 </h2>
 
                 <div className="space-y-4">
@@ -435,7 +431,7 @@ export default function Dashboard() {
                 </div>
 
                 <button className="w-full mt-4 px-4 py-2 text-center text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">
-                  View All Alerts
+                  {t("view_all_alerts")}
                 </button>
               </div>
             </div>
@@ -445,7 +441,7 @@ export default function Dashboard() {
               <div className="rounded-xl border border-border p-6 bg-card">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <MapPin className="w-5 h-5" />
-                  Hospital Network Status
+                  {t("hospital_network_status")}
                 </h2>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -460,31 +456,31 @@ export default function Dashboard() {
           {/* Predictions Section */}
           <div className="mt-8 rounded-xl border border-border p-6 bg-card">
             <h2 className="text-xl font-bold mb-4">
-              AI Predictions (Next 7 Days)
+              {t("ai_predictions")}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
                 {
-                  day: "Tomorrow",
+                  day: t("tomorrow"),
                   icuBeds: "890",
                   oxygen: "2450",
                   confidence: "92%",
                 },
                 {
-                  day: "Day 3",
+                  day: t("day_3"),
                   icuBeds: "920",
                   oxygen: "2580",
                   confidence: "88%",
                 },
                 {
-                  day: "Day 4",
+                  day: t("day_4"),
                   icuBeds: "850",
                   oxygen: "2380",
                   confidence: "85%",
                 },
                 {
-                  day: "Day 7",
+                  day: t("day_7"),
                   icuBeds: "780",
                   oxygen: "2200",
                   confidence: "78%",
@@ -510,7 +506,7 @@ export default function Dashboard() {
                     </div>
                   </div>
                   <div className="px-2 py-1 bg-success/20 rounded text-xs font-semibold text-success inline-block">
-                    {pred.confidence} confidence
+                    {pred.confidence} {t("confidence")}
                   </div>
                 </div>
               ))}
@@ -520,25 +516,25 @@ export default function Dashboard() {
           {/* Recommendations */}
           <div className="mt-8 rounded-xl border border-border p-6 bg-gradient-to-r from-primary/10 to-secondary/10">
             <h2 className="text-xl font-bold mb-4">
-              Actionable Recommendations
+              {t("actionable_recommendations")}
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
                 {
-                  title: "Increase Oxygen Supply",
-                  description: "Current trajectory suggests shortage in 5 days",
-                  action: "Request additional supplies",
+                  title: t("increase_oxygen_supply"),
+                  description: t("increase_oxygen_desc"),
+                  action: t("request_supplies"),
                 },
                 {
-                  title: "Optimize Staff Allocation",
-                  description: "Peak demand expected on Day 3-4",
-                  action: "Schedule additional shifts",
+                  title: t("optimize_staff"),
+                  description: t("optimize_staff_desc"),
+                  action: t("schedule_shifts"),
                 },
                 {
-                  title: "Activate Surge Protocol",
-                  description: "Prepare for potential capacity overload",
-                  action: "Review surge procedures",
+                  title: t("activate_surge"),
+                  description: t("activate_surge_desc"),
+                  action: t("review_procedures"),
                 },
               ].map((rec, i) => (
                 <div

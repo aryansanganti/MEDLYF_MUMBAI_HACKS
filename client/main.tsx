@@ -8,6 +8,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { App } from "./App";
+import './i18n'; // Import i18n configuration
 
 const queryClient = new QueryClient();
 
