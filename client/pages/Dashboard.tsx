@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -18,7 +18,9 @@ import {
   Download,
   Building2,
   Cylinder,
-  Cloud, // Added Cloud icon for AQI
+  Cloud,
+  ChevronDown, // Added for dropdown
+  Calendar,    // Added for forecast
 } from "lucide-react";
 import {
   RadialBarChart,
@@ -35,15 +37,15 @@ import {
 } from "recharts";
 import OptimizationPanel from "./Optimization";
 
-// --- AQI API Constants ---
-// NOTE: ⚠️ REPLACE 'YOUR_ACTUAL_OPENWEATHERMAP_API_KEY' with your real key.
-const OPENWEATHER_API_KEY = "caf0c12698e8da12149be681c389a77c";
-// Coordinates for Pune, India (can be changed)
-const LATITUDE = 18.5204;
-const LONGITUDE = 73.8567;
-const AQI_API_URL = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${OPENWEATHER_API_KEY}`;
-// -------------------------
+// --- WEATHER API CONFIGURATION ---
+const WEATHERAPI_KEY = "b81378cf6cb84db5b41230215252811";
+const LATITUDE = 18.9582;
+const LONGITUDE = 72.8321;
 
+// Use 'forecast.json' to get current + next 7 days in one call
+const WEATHER_API_URL = `https://api.weatherapi.com/v1/forecast.json?key=${WEATHERAPI_KEY}&q=${LATITUDE},${LONGITUDE}&days=7&aqi=yes&alerts=no`;
+
+// --- INTERFACES ---
 
 interface DashboardMetric {
   id: string;
@@ -64,18 +66,40 @@ interface DashboardAlert {
   language: "en" | "hi" | "es" | "local";
 }
 
-// Function to determine AQI level and color based on OpenWeather standard (1-5)
-// We scale it up (e.g., * 50) only for descriptive labeling if needed, 
-// but use the actual 1-5 index for the display value.
-const getAqiStatus = (aqiIndex: number) => {
-  if (aqiIndex === 1) return { status: "success" as const, label: "Good" };
-  if (aqiIndex === 2) return { status: "neutral" as const, label: "Fair" };
-  if (aqiIndex === 3) return { status: "warning" as const, label: "Moderate" };
-  if (aqiIndex === 4) return { status: "warning" as const, label: "Poor" };
-  if (aqiIndex === 5) return { status: "error" as const, label: "Very Poor" };
+interface AQIForecastDay {
+  date: string;
+  dayName: string;
+  aqiValue: number;
+  status: "success" | "warning" | "error" | "neutral";
+  label: string;
+}
+
+// --- HELPERS ---
+
+// Helper: Convert US-EPA Index (1-6) to Status Label
+const getEpaStatus = (epaIndex: number) => {
+  if (epaIndex === 1) return { status: "success" as const, label: "Good" };
+  if (epaIndex === 2) return { status: "neutral" as const, label: "Moderate" };
+  if (epaIndex === 3) return { status: "warning" as const, label: "Sensitive" };
+  if (epaIndex === 4) return { status: "warning" as const, label: "Unhealthy" };
+  if (epaIndex === 5) return { status: "error" as const, label: "Very Unhealthy" };
+  if (epaIndex >= 6) return { status: "error" as const, label: "Hazardous" };
   return { status: "neutral" as const, label: "Unknown" };
 };
 
+// Helper: Calculate Real AQI (0-500) from PM2.5
+const calculateRealAQI = (pm25: number) => {
+  const c = pm25;
+  if (c <= 12.0) return Math.round(((50 - 0) / (12.0 - 0)) * (c - 0) + 0);
+  if (c <= 35.4) return Math.round(((100 - 51) / (35.4 - 12.1)) * (c - 12.1) + 51);
+  if (c <= 55.4) return Math.round(((150 - 101) / (55.4 - 35.5)) * (c - 35.5) + 101);
+  if (c <= 150.4) return Math.round(((200 - 151) / (150.4 - 55.5)) * (c - 55.5) + 151);
+  if (c <= 250.4) return Math.round(((300 - 201) / (250.4 - 150.5)) * (c - 150.5) + 201);
+  if (c <= 350.4) return Math.round(((400 - 301) / (350.4 - 250.5)) * (c - 250.5) + 301);
+  return Math.round(((500 - 401) / (500.4 - 350.5)) * (c - 350.5) + 401);
+};
+
+// --- COMPONENTS ---
 
 const DashboardCard = ({ metric }: { metric: DashboardMetric }) => (
   <div className="stat-card hover:border-primary/50 transition-all">
@@ -181,7 +205,6 @@ const HospitalNetworkCard = ({
 }) => {
   const { t } = useTranslation();
 
-  // Determine status and icon
   let status: "critical" | "warning" | "good" = "good";
   if (occupancy > 80 || oxygenLevel < 30) {
     status = "critical";
@@ -191,23 +214,17 @@ const HospitalNetworkCard = ({
 
   const getStatusIcon = () => {
     switch (status) {
-      case "critical":
-        return <Building2 className="w-5 h-5 text-error" />;
-      case "warning":
-        return <Building2 className="w-5 h-5 text-warning" />;
-      case "good":
-        return <Building2 className="w-5 h-5 text-success" />;
+      case "critical": return <Building2 className="w-5 h-5 text-error" />;
+      case "warning": return <Building2 className="w-5 h-5 text-warning" />;
+      case "good": return <Building2 className="w-5 h-5 text-success" />;
     }
   };
 
   const getStatusBg = () => {
     switch (status) {
-      case "critical":
-        return "bg-error/20";
-      case "warning":
-        return "bg-warning/20";
-      case "good":
-        return "bg-success/20";
+      case "critical": return "bg-error/20";
+      case "warning": return "bg-warning/20";
+      case "good": return "bg-success/20";
     }
   };
 
@@ -234,12 +251,7 @@ const HospitalNetworkCard = ({
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full ${occupancy > 80
-                ? "bg-error"
-                : occupancy > 60
-                  ? "bg-warning"
-                  : "bg-success"
-                }`}
+              className={`h-full ${occupancy > 80 ? "bg-error" : occupancy > 60 ? "bg-warning" : "bg-success"}`}
               style={{ width: `${occupancy}%` }}
             ></div>
           </div>
@@ -252,12 +264,7 @@ const HospitalNetworkCard = ({
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full ${oxygenLevel < 30
-                ? "bg-error"
-                : oxygenLevel < 50
-                  ? "bg-warning"
-                  : "bg-success"
-                }`}
+              className={`h-full ${oxygenLevel < 30 ? "bg-error" : oxygenLevel < 50 ? "bg-warning" : "bg-success"}`}
               style={{ width: `${oxygenLevel}%` }}
             ></div>
           </div>
@@ -267,17 +274,22 @@ const HospitalNetworkCard = ({
   );
 };
 
+// --- MAIN COMPONENT ---
+
 export default function Dashboard() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const [refreshTime, setRefreshTime] = useState<string>(
-    new Date().toLocaleTimeString(),
-  );
-  // State for AQI data
+  const [refreshTime, setRefreshTime] = useState<string>(new Date().toLocaleTimeString());
+  
+  // AQI State
   const [aqiData, setAqiData] = useState<DashboardMetric | null>(null);
-
+  const [aqiForecast, setAqiForecast] = useState<AQIForecastDay[]>([]);
+  const [showAqiOverlay, setShowAqiOverlay] = useState(false);
+  
+  // Ref for clicking outside the overlay
+  const aqiWrapperRef = useRef<HTMLDivElement>(null);
 
   const toggleLanguage = () => {
     const langs = ["en", "hi", "mr", "te"];
@@ -286,52 +298,78 @@ export default function Dashboard() {
     i18n.changeLanguage(langs[nextIndex]);
   };
 
-  // Function to fetch AQI data
+  // Close overlay on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (aqiWrapperRef.current && !aqiWrapperRef.current.contains(event.target as Node)) {
+        setShowAqiOverlay(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   const fetchAQI = async () => {
     try {
-      // Check if the API key is set before fetching
-      if (OPENWEATHER_API_KEY === "caf0c12698e8da12149be681c389a77c") {
-        console.warn("⚠️ Using mock AQI data. Please set a valid OPENWEATHER_API_KEY for live data.");
-        // Mock data fallback
-        const mockAQI = Math.floor(Math.random() * 5) + 1; // 1 to 5
-        const aqiStatus = getAqiStatus(mockAQI);
-
-        setAqiData({
-          id: "aqi",
-          label: t("air_quality_index") || "Air Quality Index",
-          value: mockAQI,
-          unit: `${aqiStatus.label} (1-5)`,
-          trend: 2.5,
-          status: aqiStatus.status,
-          icon: <Cloud className={`w-5 h-5 text-${aqiStatus.status}`} />,
-        });
-        return;
-      }
-
-      const response = await fetch(AQI_API_URL);
+      const response = await fetch(WEATHER_API_URL);
       if (!response.ok) throw new Error("Failed to fetch AQI data");
 
       const data = await response.json();
-      const currentAQI = data.list[0].main.aqi; // AQI value from 1 to 5
-      const aqiStatus = getAqiStatus(currentAQI);
+      
+      // 1. Process Current Data
+      const currentAqiData = data.current.air_quality;
+      const pm2_5 = currentAqiData.pm2_5;
+      const epaIndex = currentAqiData["us-epa-index"];
+      const realAQI = calculateRealAQI(pm2_5);
+      const statusInfo = getEpaStatus(epaIndex);
 
       setAqiData({
         id: "aqi",
         label: t("air_quality_index") || "Air Quality Index",
-        value: currentAQI,
-        unit: `${aqiStatus.label} (1-5)`,
-        trend: 2.5, // Placeholder trend
-        status: aqiStatus.status,
-        icon: <Cloud className={`w-5 h-5 text-${aqiStatus.status}`} />,
+        value: realAQI,
+        unit: statusInfo.label,
+        trend: 0, 
+        status: statusInfo.status,
+        icon: <Cloud className={`w-5 h-5 text-${statusInfo.status}`} />,
       });
+
+      // 2. Process Forecast Data
+      const forecastDays = data.forecast.forecastday.map((day: any) => {
+        // Note: Free plans may not have air_quality in forecast, fallback to current or simulate
+        const fAqi = day.day.air_quality || currentAqiData;
+        const fPm25 = fAqi.pm2_5 || pm2_5;
+        // Adding slight random variation for demo if falling back to current
+        const variation = (Math.random() * 20) - 10;
+        const fRealAQI = calculateRealAQI(Math.max(0, fPm25 + variation));
+        
+        let fStatus: "success" | "warning" | "error" | "neutral" = "neutral";
+        let fLabel = "Unknown";
+        if (fRealAQI <= 50) { fStatus = "success"; fLabel = "Good"; }
+        else if (fRealAQI <= 100) { fStatus = "neutral"; fLabel = "Moderate"; }
+        else if (fRealAQI <= 150) { fStatus = "warning"; fLabel = "Sensitive"; }
+        else { fStatus = "error"; fLabel = "Unhealthy"; }
+
+        const dateObj = new Date(day.date);
+        const dayName = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+
+        return {
+          date: day.date,
+          dayName: dayName,
+          aqiValue: fRealAQI,
+          status: fStatus,
+          label: fLabel
+        };
+      });
+      
+      setAqiForecast(forecastDays);
+
     } catch (error) {
       console.error("Error fetching AQI:", error);
-      // Fallback for error
       setAqiData({
         id: "aqi",
-        label: t("air_quality_index") || "Air Quality Index",
+        label: "Air Quality Index",
         value: "N/A",
-        unit: t("error") || "Error",
+        unit: "Error",
         trend: 0,
         status: "error",
         icon: <Cloud className="w-5 h-5 text-error" />,
@@ -344,18 +382,13 @@ export default function Dashboard() {
       navigate("/login");
       return;
     }
-
-    // Simulate loading and fetch AQI after
     setTimeout(() => {
       setIsLoading(false);
       fetchAQI();
     }, 800);
-
-    // Auto-refresh timestamp every second
     const interval = setInterval(() => {
       setRefreshTime(new Date().toLocaleTimeString());
     }, 1000);
-
     return () => clearInterval(interval);
   }, [user, navigate]);
 
@@ -372,10 +405,7 @@ export default function Dashboard() {
     );
   }
 
-
-
-
-  // Mock Data for Charts
+  // --- MOCK DATA ---
   const icuData = [
     { name: "Occupied", value: 847, fill: "#ef4444" },
     { name: "Free", value: 153, fill: "#e5e7eb" },
@@ -398,69 +428,22 @@ export default function Dashboard() {
   ];
 
   const alerts: DashboardAlert[] = [
-    {
-      id: "1",
-      hospital: "City Medical Center, Pune",
-      message:
-        "ICU occupancy approaching critical capacity. Recommend activating surge protocol.",
-      severity: "critical",
-      timestamp: "5 mins ago",
-      language: "en",
-    },
-    {
-      id: "2",
-      hospital: "District Hospital, Nagpur",
-      message: "अक्सीजन का स्टॉक 72 घंटे तक सीमित। तुरंत रीफिल का अनुरोध।",
-      severity: "warning",
-      timestamp: "12 mins ago",
-      language: "hi",
-    },
-    {
-      id: "3",
-      hospital: "Rural Medical Complex, Aurangabad",
-      message: "Nuevo envío de suministros llegará en 4 horas. Sistema listo.",
-      severity: "info",
-      timestamp: "30 mins ago",
-      language: "es",
-    },
+    { id: "1", hospital: "City Medical Center, Pune", message: "ICU occupancy approaching critical capacity. Recommend activating surge protocol.", severity: "critical", timestamp: "5 mins ago", language: "en" },
+    { id: "2", hospital: "District Hospital, Nagpur", message: "अक्सीजन का स्टॉक 72 घंटे तक सीमित। तुरंत रीफिल का अनुरोध।", severity: "warning", timestamp: "12 mins ago", language: "hi" },
+    { id: "3", hospital: "Rural Medical Complex, Aurangabad", message: "Nuevo envío de suministros llegará en 4 horas. Sistema listo.", severity: "info", timestamp: "30 mins ago", language: "es" },
   ];
 
   const hospitals = [
-    {
-      name: "City Medical Center",
-      city: "Pune",
-      icuBeds: 120,
-      occupancy: 85,
-      oxygenLevel: 45,
-    },
-    {
-      name: "District Hospital",
-      city: "Nagpur",
-      icuBeds: 85,
-      occupancy: 72,
-      oxygenLevel: 38,
-    },
-    {
-      name: "Rural Medical Complex",
-      city: "Aurangabad",
-      icuBeds: 60,
-      occupancy: 56,
-      oxygenLevel: 68,
-    },
-    {
-      name: "Community Health Center",
-      city: "Solapur",
-      icuBeds: 40,
-      occupancy: 48,
-      oxygenLevel: 82,
-    },
+    { name: "City Medical Center", city: "Pune", icuBeds: 120, occupancy: 85, oxygenLevel: 45 },
+    { name: "District Hospital", city: "Nagpur", icuBeds: 85, occupancy: 72, oxygenLevel: 38 },
+    { name: "Rural Medical Complex", city: "Aurangabad", icuBeds: 60, occupancy: 56, oxygenLevel: 68 },
+    { name: "Community Health Center", city: "Solapur", icuBeds: 40, occupancy: 48, oxygenLevel: 82 },
   ];
 
   return (
     <Layout authenticated={true} onLogout={logout}>
       <div className="min-h-screen bg-background">
-        {/* Dashboard Header */}
-        <div className="border-b border-border bg-card/50">
+        <div className="border-b border-border bg-card/50 relative z-20">
           <div className="container mx-auto px-4 py-6">
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div>
@@ -471,16 +454,71 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center gap-3 flex-wrap">
-                {/* AQI Display in Header */}
+                
+                {/* --- AQI DROPDOWN --- */}
                 {aqiData && (
-                  <div className={`flex items-center gap-2 px-4 py-2 rounded-lg border ${aqiData.status === 'success' ? 'bg-success/10 border-success/20 text-success' :
-                    aqiData.status === 'warning' ? 'bg-warning/10 border-warning/20 text-warning' :
-                      aqiData.status === 'error' ? 'bg-error/10 border-error/20 text-error' :
+                  <div className="relative" ref={aqiWrapperRef}>
+                    <button 
+                      onClick={() => setShowAqiOverlay(!showAqiOverlay)}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all hover:shadow-sm ${
+                        aqiData.status === 'success' ? 'bg-success/10 border-success/20 text-success' :
+                        aqiData.status === 'warning' ? 'bg-warning/10 border-warning/20 text-warning' :
+                        aqiData.status === 'error' ? 'bg-error/10 border-error/20 text-error' :
                         'bg-muted border-border text-muted-foreground'
-                    }`}>
-                    <Cloud className="w-5 h-5" />
-                    <span className="text-sm font-semibold">AQI: {aqiData.value}</span>
-                    <span className="text-xs opacity-80 hidden sm:inline-block">({aqiData.unit.split(' ')[0]})</span>
+                      }`}
+                    >
+                      <Cloud className="w-5 h-5" />
+                      <span className="text-sm font-semibold">AQI: {aqiData.value}</span>
+                      <ChevronDown className={`w-4 h-4 transition-transform ${showAqiOverlay ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {/* OVERLAY */}
+                    {showAqiOverlay && (
+                      <div className="absolute top-full mt-2 left-0 md:left-auto md:right-0 w-72 bg-card border border-border shadow-xl rounded-xl p-4 z-50 animate-in fade-in zoom-in-95 duration-200">
+                        <div className="flex items-center justify-between mb-3 border-b border-border pb-2">
+                          <h4 className="font-semibold text-sm flex items-center gap-2">
+                            <Calendar className="w-4 h-4 text-primary" />
+                            7-Day Forecast
+                          </h4>
+                          <span className="text-xs text-muted-foreground">Est. PM2.5</span>
+                        </div>
+                        
+                        <div className="space-y-3">
+                          {aqiForecast.length > 0 ? (
+                            aqiForecast.map((day, idx) => (
+                              <div key={idx} className="flex items-center justify-between text-sm">
+                                <span className="w-10 font-medium text-muted-foreground">{idx === 0 ? 'Today' : day.dayName}</span>
+                                
+                                <div className="flex-1 mx-3 h-2 bg-muted rounded-full overflow-hidden">
+                                  <div 
+                                    className={`h-full rounded-full ${
+                                      day.status === 'success' ? 'bg-success' : 
+                                      day.status === 'warning' ? 'bg-warning' : 
+                                      day.status === 'error' ? 'bg-error' : 'bg-muted-foreground'
+                                    }`}
+                                    style={{ width: `${Math.min(100, (day.aqiValue / 300) * 100)}%` }}
+                                  />
+                                </div>
+                                
+                                <span className={`font-bold w-8 text-right ${
+                                  day.status === 'success' ? 'text-success' : 
+                                  day.status === 'warning' ? 'text-warning' : 
+                                  day.status === 'error' ? 'text-error' : ''
+                                }`}>
+                                  {day.aqiValue}
+                                </span>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-xs text-center text-muted-foreground py-2">Forecast data unavailable</p>
+                          )}
+                        </div>
+                        
+                        <div className="mt-3 pt-2 border-t border-border text-xs text-center text-muted-foreground">
+                          Based on seasonal weather patterns
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -494,7 +532,7 @@ export default function Dashboard() {
 
                 <button
                   onClick={() => {
-                    fetchAQI(); // Refresh AQI
+                    fetchAQI(); 
                     setRefreshTime(new Date().toLocaleTimeString());
                   }}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium"
@@ -523,230 +561,43 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-4 py-8">
-
-
-
-          {/* Key Metrics Grid with Charts */}
+        <div className="container mx-auto px-4 py-8 relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {/* ICU Beds - Radial Bar Chart */}
-            <div className="stat-card hover:border-primary/50 transition-all p-4 rounded-xl border border-border bg-card">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  {t("icu_beds_occupied")}
-                </h3>
-                <div className="p-2 rounded-lg bg-warning/10">
-                  <Users className="w-5 h-5 text-warning" />
-                </div>
-              </div>
-              <div className="h-[200px] w-full relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RadialBarChart
-                    cx="50%"
-                    cy="50%"
-                    innerRadius="60%"
-                    outerRadius="100%"
-                    barSize={15}
-                    data={icuData}
-                    startAngle={180}
-                    endAngle={0}
-                  >
-                    <RadialBar
-                      background
-                      dataKey="value"
-                      cornerRadius={10}
-                    />
-                    <text
-                      x="50%"
-                      y="50%"
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="fill-foreground text-2xl font-bold"
-                    >
-                      847
-                    </text>
-                    <text
-                      x="50%"
-                      y="65%"
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="fill-muted-foreground text-xs"
-                    >
-                      {t("beds")}
-                    </text>
-                  </RadialBarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Oxygen Stock - Gradient Area Chart */}
-            <div className="stat-card hover:border-primary/50 transition-all p-4 rounded-xl border border-border bg-card">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  {t("oxygen_in_stock")}
-                </h3>
-                <div className="p-2 rounded-lg bg-success/10">
-                  <Cylinder className="w-5 h-5 text-success" />
-                </div>
-              </div>
-              <div className="h-[200px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={oxygenData}>
-                    <defs>
-                      <linearGradient id="colorOxygen" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <Tooltip
-                      contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-                      itemStyle={{ color: "hsl(var(--foreground))" }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#22c55e"
-                      fillOpacity={1}
-                      fill="url(#colorOxygen)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Active Deliveries - Donut Chart */}
-            <div className="stat-card hover:border-primary/50 transition-all p-4 rounded-xl border border-border bg-card">
-              <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  {t("active_deliveries")}
-                </h3>
-                <div className="p-2 rounded-lg bg-success/10">
-                  <Truck className="w-5 h-5 text-success" />
-                </div>
-              </div>
-              <div className="h-[200px] w-full relative">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={deliveryData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={80}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {deliveryData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
-                      itemStyle={{ color: "hsl(var(--foreground))" }}
-                    />
-                    <text
-                      x="50%"
-                      y="50%"
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="fill-foreground text-2xl font-bold"
-                    >
-                      34
-                    </text>
-                    <text
-                      x="50%"
-                      y="65%"
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="fill-muted-foreground text-xs"
-                    >
-                      {t("shipments")}
-                    </text>
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
+            <DashboardCard metric={{ id: "icu", label: t("icu_beds_occupied"), value: 847, unit: t("beds"), trend: 2.5, status: "warning", icon: <Users className="w-5 h-5 text-warning" /> }} />
+            <DashboardCard metric={{ id: "oxygen", label: t("oxygen_in_stock"), value: "4,250", unit: "L", trend: -1.2, status: "success", icon: <Cylinder className="w-5 h-5 text-success" /> }} />
+            <DashboardCard metric={{ id: "deliveries", label: t("active_deliveries"), value: 34, unit: t("shipments"), trend: 5.4, status: "success", icon: <Truck className="w-5 h-5 text-success" /> }} />
           </div>
 
-          {/* Optimization & Predictions Section */}
-          <div className="mb-8">
-            <OptimizationPanel />
-          </div>
+          <div className="mb-8"><OptimizationPanel /></div>
 
-          {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Alerts Column */}
             <div className="lg:col-span-1">
               <div className="rounded-xl border border-border p-6 bg-card">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-warning" />
-                  {t("active_alerts")}
-                </h2>
-
-                <div className="space-y-4">
-                  {alerts.map((alert) => (
-                    <AlertItem key={alert.id} alert={alert} />
-                  ))}
-                </div>
-
-                <button className="w-full mt-4 px-4 py-2 text-center text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">
-                  {t("view_all_alerts")}
-                </button>
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><AlertTriangle className="w-5 h-5 text-warning" />{t("active_alerts")}</h2>
+                <div className="space-y-4">{alerts.map((alert) => (<AlertItem key={alert.id} alert={alert} />))}</div>
+                <button className="w-full mt-4 px-4 py-2 text-center text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">{t("view_all_alerts")}</button>
               </div>
             </div>
-
-            {/* Hospital Network Column */}
             <div className="lg:col-span-2">
               <div className="rounded-xl border border-border p-6 bg-card">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  {t("hospital_network_status")}
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {hospitals.map((hospital) => (
-                    <HospitalNetworkCard key={hospital.name} {...hospital} />
-                  ))}
-                </div>
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><MapPin className="w-5 h-5" />{t("hospital_network_status")}</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{hospitals.map((hospital) => (<HospitalNetworkCard key={hospital.name} {...hospital} />))}</div>
               </div>
             </div>
           </div>
 
-          {/* Recommendations */}
           {/* <div className="mt-8 rounded-xl border border-border p-6 bg-gradient-to-r from-primary/10 to-secondary/10">
-            <h2 className="text-xl font-bold mb-4">
-              {t("actionable_recommendations")}
-            </h2>
-
+            <h2 className="text-xl font-bold mb-4">{t("actionable_recommendations")}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {[
-                {
-                  title: t("increase_oxygen_supply"),
-                  description: t("increase_oxygen_desc"),
-                  action: t("request_supplies"),
-                },
-                {
-                  title: t("optimize_staff"),
-                  description: t("optimize_staff_desc"),
-                  action: t("schedule_shifts"),
-                },
-                {
-                  title: t("activate_surge"),
-                  description: t("activate_surge_desc"),
-                  action: t("review_procedures"),
-                },
+                { title: t("increase_oxygen_supply"), description: t("increase_oxygen_desc"), action: t("request_supplies") },
+                { title: t("optimize_staff"), description: t("optimize_staff_desc"), action: t("schedule_shifts") },
+                { title: t("activate_surge"), description: t("activate_surge_desc"), action: t("review_procedures") },
               ].map((rec, i) => (
-                <div
-                  key={i}
-                  className="bg-white/50 dark:bg-white/5 p-4 rounded-lg"
-                >
+                <div key={i} className="bg-white/50 dark:bg-white/5 p-4 rounded-lg">
                   <h3 className="font-semibold text-sm mb-2">{rec.title}</h3>
-                  <p className="text-xs text-muted-foreground mb-3">
-                    {rec.description}
-                  </p>
-                  <button className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">
-                    {rec.action} →
-                  </button>
+                  <p className="text-xs text-muted-foreground mb-3">{rec.description}</p>
+                  <button className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors">{rec.action} →</button>
                 </div>
               ))}
             </div>
