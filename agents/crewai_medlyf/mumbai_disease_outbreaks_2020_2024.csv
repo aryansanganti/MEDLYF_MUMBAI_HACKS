@@ -1,0 +1,481 @@
+year,month,disease,condition,reported_cases
+2020,Jan,COVID-19,medium,5000
+2020,Jan,Dengue,low,300
+2020,Jan,Malaria,low,400
+2020,Jan,HIV/AIDS,low,500
+2020,Jan,Measles,low,100
+2020,Jan,Typhoid,low,600
+2020,Jan,Viral Flu,low,2000
+2020,Jan,Tuberculosis,low,3000
+2020,Feb,COVID-19,medium,5000
+2020,Feb,Dengue,low,300
+2020,Feb,Malaria,low,400
+2020,Feb,HIV/AIDS,low,500
+2020,Feb,Measles,low,40
+2020,Feb,Typhoid,low,600
+2020,Feb,Viral Flu,low,2000
+2020,Feb,Tuberculosis,low,3000
+2020,Mar,COVID-19,medium,5000
+2020,Mar,Dengue,low,300
+2020,Mar,Malaria,low,400
+2020,Mar,HIV/AIDS,low,500
+2020,Mar,Measles,low,40
+2020,Mar,Typhoid,low,600
+2020,Mar,Viral Flu,low,2000
+2020,Mar,Tuberculosis,low,3000
+2020,Apr,COVID-19,medium,4500
+2020,Apr,Dengue,low,300
+2020,Apr,Malaria,low,400
+2020,Apr,HIV/AIDS,low,500
+2020,Apr,Measles,low,40
+2020,Apr,Typhoid,low,600
+2020,Apr,Viral Flu,low,2000
+2020,Apr,Tuberculosis,low,3000
+2020,May,COVID-19,medium,9500
+2020,May,Dengue,low,300
+2020,May,Malaria,low,400
+2020,May,HIV/AIDS,low,500
+2020,May,Measles,low,40
+2020,May,Typhoid,low,600
+2020,May,Viral Flu,low,2000
+2020,May,Tuberculosis,low,3000
+2020,Jun,COVID-19,critical,18000
+2020,Jun,Dengue,low,300
+2020,Jun,Malaria,low,400
+2020,Jun,HIV/AIDS,low,500
+2020,Jun,Measles,low,40
+2020,Jun,Typhoid,low,600
+2020,Jun,Viral Flu,medium,5000
+2020,Jun,Tuberculosis,low,3000
+2020,Jul,COVID-19,critical,22000
+2020,Jul,Dengue,low,750
+2020,Jul,Malaria,low,1000
+2020,Jul,HIV/AIDS,low,500
+2020,Jul,Measles,low,40
+2020,Jul,Typhoid,low,1500
+2020,Jul,Viral Flu,medium,5000
+2020,Jul,Tuberculosis,low,3000
+2020,Aug,COVID-19,medium,5000
+2020,Aug,Dengue,low,750
+2020,Aug,Malaria,low,1000
+2020,Aug,HIV/AIDS,low,500
+2020,Aug,Measles,low,40
+2020,Aug,Typhoid,low,1500
+2020,Aug,Viral Flu,medium,5000
+2020,Aug,Tuberculosis,low,3000
+2020,Sep,COVID-19,medium,5000
+2020,Sep,Dengue,low,750
+2020,Sep,Malaria,low,1000
+2020,Sep,HIV/AIDS,low,500
+2020,Sep,Measles,low,40
+2020,Sep,Typhoid,low,1500
+2020,Sep,Viral Flu,low,2000
+2020,Sep,Tuberculosis,low,3000
+2020,Oct,COVID-19,medium,5000
+2020,Oct,Dengue,low,750
+2020,Oct,Malaria,low,1000
+2020,Oct,HIV/AIDS,low,500
+2020,Oct,Measles,low,40
+2020,Oct,Typhoid,low,600
+2020,Oct,Viral Flu,low,2000
+2020,Oct,Tuberculosis,low,3000
+2020,Nov,COVID-19,medium,5000
+2020,Nov,Dengue,low,300
+2020,Nov,Malaria,low,400
+2020,Nov,HIV/AIDS,low,500
+2020,Nov,Measles,low,100
+2020,Nov,Typhoid,low,600
+2020,Nov,Viral Flu,low,2000
+2020,Nov,Tuberculosis,low,3000
+2020,Dec,COVID-19,medium,5000
+2020,Dec,Dengue,low,300
+2020,Dec,Malaria,low,400
+2020,Dec,HIV/AIDS,low,500
+2020,Dec,Measles,low,100
+2020,Dec,Typhoid,low,600
+2020,Dec,Viral Flu,low,2000
+2020,Dec,Tuberculosis,low,3000
+2021,Jan,COVID-19,medium,5250
+2021,Jan,Dengue,low,315
+2021,Jan,Malaria,low,420
+2021,Jan,HIV/AIDS,low,525
+2021,Jan,Measles,low,105
+2021,Jan,Typhoid,low,630
+2021,Jan,Viral Flu,low,2100
+2021,Jan,Tuberculosis,medium,3150
+2021,Feb,COVID-19,medium,5250
+2021,Feb,Dengue,low,315
+2021,Feb,Malaria,low,420
+2021,Feb,HIV/AIDS,low,525
+2021,Feb,Measles,low,42
+2021,Feb,Typhoid,low,630
+2021,Feb,Viral Flu,low,2100
+2021,Feb,Tuberculosis,medium,3150
+2021,Mar,COVID-19,medium,8925
+2021,Mar,Dengue,low,315
+2021,Mar,Malaria,low,420
+2021,Mar,HIV/AIDS,low,525
+2021,Mar,Measles,low,42
+2021,Mar,Typhoid,low,630
+2021,Mar,Viral Flu,low,2100
+2021,Mar,Tuberculosis,medium,3150
+2021,Apr,COVID-19,critical,29400
+2021,Apr,Dengue,low,315
+2021,Apr,Malaria,low,420
+2021,Apr,HIV/AIDS,low,525
+2021,Apr,Measles,low,42
+2021,Apr,Typhoid,low,630
+2021,Apr,Viral Flu,low,2100
+2021,Apr,Tuberculosis,medium,3150
+2021,May,COVID-19,medium,13125
+2021,May,Dengue,low,315
+2021,May,Malaria,low,420
+2021,May,HIV/AIDS,low,525
+2021,May,Measles,low,42
+2021,May,Typhoid,low,630
+2021,May,Viral Flu,low,2100
+2021,May,Tuberculosis,medium,3150
+2021,Jun,COVID-19,medium,13125
+2021,Jun,Dengue,low,315
+2021,Jun,Malaria,low,420
+2021,Jun,HIV/AIDS,low,525
+2021,Jun,Measles,low,42
+2021,Jun,Typhoid,low,630
+2021,Jun,Viral Flu,medium,5250
+2021,Jun,Tuberculosis,medium,3150
+2021,Jul,COVID-19,medium,5250
+2021,Jul,Dengue,low,787
+2021,Jul,Malaria,low,1050
+2021,Jul,HIV/AIDS,low,525
+2021,Jul,Measles,low,42
+2021,Jul,Typhoid,low,1575
+2021,Jul,Viral Flu,medium,5250
+2021,Jul,Tuberculosis,medium,3150
+2021,Aug,COVID-19,medium,5250
+2021,Aug,Dengue,low,787
+2021,Aug,Malaria,low,1050
+2021,Aug,HIV/AIDS,low,525
+2021,Aug,Measles,low,42
+2021,Aug,Typhoid,low,1575
+2021,Aug,Viral Flu,medium,5250
+2021,Aug,Tuberculosis,medium,3150
+2021,Sep,COVID-19,medium,5250
+2021,Sep,Dengue,low,787
+2021,Sep,Malaria,low,1050
+2021,Sep,HIV/AIDS,low,525
+2021,Sep,Measles,low,42
+2021,Sep,Typhoid,low,1575
+2021,Sep,Viral Flu,low,2100
+2021,Sep,Tuberculosis,medium,3150
+2021,Oct,COVID-19,medium,5250
+2021,Oct,Dengue,low,787
+2021,Oct,Malaria,low,1050
+2021,Oct,HIV/AIDS,low,525
+2021,Oct,Measles,low,42
+2021,Oct,Typhoid,low,630
+2021,Oct,Viral Flu,low,2100
+2021,Oct,Tuberculosis,medium,3150
+2021,Nov,COVID-19,medium,5250
+2021,Nov,Dengue,low,315
+2021,Nov,Malaria,low,420
+2021,Nov,HIV/AIDS,low,525
+2021,Nov,Measles,low,105
+2021,Nov,Typhoid,low,630
+2021,Nov,Viral Flu,low,2100
+2021,Nov,Tuberculosis,medium,3150
+2021,Dec,COVID-19,medium,5250
+2021,Dec,Dengue,low,315
+2021,Dec,Malaria,low,420
+2021,Dec,HIV/AIDS,low,525
+2021,Dec,Measles,low,105
+2021,Dec,Typhoid,low,630
+2021,Dec,Viral Flu,low,2100
+2021,Dec,Tuberculosis,medium,3150
+2022,Jan,COVID-19,medium,5500
+2022,Jan,Dengue,low,330
+2022,Jan,Malaria,low,440
+2022,Jan,HIV/AIDS,low,550
+2022,Jan,Measles,low,110
+2022,Jan,Typhoid,low,660
+2022,Jan,Viral Flu,low,2200
+2022,Jan,Tuberculosis,medium,3300
+2022,Feb,COVID-19,medium,5500
+2022,Feb,Dengue,low,330
+2022,Feb,Malaria,low,440
+2022,Feb,HIV/AIDS,low,550
+2022,Feb,Measles,low,44
+2022,Feb,Typhoid,low,660
+2022,Feb,Viral Flu,low,2200
+2022,Feb,Tuberculosis,medium,3300
+2022,Mar,COVID-19,medium,5500
+2022,Mar,Dengue,low,330
+2022,Mar,Malaria,low,440
+2022,Mar,HIV/AIDS,low,550
+2022,Mar,Measles,low,44
+2022,Mar,Typhoid,low,660
+2022,Mar,Viral Flu,low,2200
+2022,Mar,Tuberculosis,medium,3300
+2022,Apr,COVID-19,medium,13750
+2022,Apr,Dengue,low,330
+2022,Apr,Malaria,low,440
+2022,Apr,HIV/AIDS,low,550
+2022,Apr,Measles,low,44
+2022,Apr,Typhoid,low,660
+2022,Apr,Viral Flu,low,2200
+2022,Apr,Tuberculosis,medium,3300
+2022,May,COVID-19,medium,13750
+2022,May,Dengue,low,330
+2022,May,Malaria,low,440
+2022,May,HIV/AIDS,low,550
+2022,May,Measles,low,44
+2022,May,Typhoid,low,660
+2022,May,Viral Flu,low,2200
+2022,May,Tuberculosis,medium,3300
+2022,Jun,COVID-19,medium,13750
+2022,Jun,Dengue,low,330
+2022,Jun,Malaria,low,440
+2022,Jun,HIV/AIDS,low,550
+2022,Jun,Measles,low,44
+2022,Jun,Typhoid,low,660
+2022,Jun,Viral Flu,medium,5500
+2022,Jun,Tuberculosis,medium,3300
+2022,Jul,COVID-19,medium,5500
+2022,Jul,Dengue,low,825
+2022,Jul,Malaria,low,1100
+2022,Jul,HIV/AIDS,low,550
+2022,Jul,Measles,low,44
+2022,Jul,Typhoid,low,1650
+2022,Jul,Viral Flu,medium,5500
+2022,Jul,Tuberculosis,medium,3300
+2022,Aug,COVID-19,medium,5500
+2022,Aug,Dengue,low,825
+2022,Aug,Malaria,low,1100
+2022,Aug,HIV/AIDS,low,550
+2022,Aug,Measles,low,44
+2022,Aug,Typhoid,low,1650
+2022,Aug,Viral Flu,medium,5500
+2022,Aug,Tuberculosis,medium,3300
+2022,Sep,COVID-19,medium,5500
+2022,Sep,Dengue,low,825
+2022,Sep,Malaria,low,1100
+2022,Sep,HIV/AIDS,low,550
+2022,Sep,Measles,low,44
+2022,Sep,Typhoid,low,1650
+2022,Sep,Viral Flu,low,2200
+2022,Sep,Tuberculosis,medium,3300
+2022,Oct,COVID-19,medium,5500
+2022,Oct,Dengue,low,825
+2022,Oct,Malaria,low,1100
+2022,Oct,HIV/AIDS,low,550
+2022,Oct,Measles,low,44
+2022,Oct,Typhoid,low,660
+2022,Oct,Viral Flu,low,2200
+2022,Oct,Tuberculosis,medium,3300
+2022,Nov,COVID-19,medium,5500
+2022,Nov,Dengue,low,330
+2022,Nov,Malaria,low,440
+2022,Nov,HIV/AIDS,low,550
+2022,Nov,Measles,low,110
+2022,Nov,Typhoid,low,660
+2022,Nov,Viral Flu,low,2200
+2022,Nov,Tuberculosis,medium,3300
+2022,Dec,COVID-19,medium,5500
+2022,Dec,Dengue,low,330
+2022,Dec,Malaria,low,440
+2022,Dec,HIV/AIDS,low,550
+2022,Dec,Measles,low,110
+2022,Dec,Typhoid,low,660
+2022,Dec,Viral Flu,low,2200
+2022,Dec,Tuberculosis,medium,3300
+2023,Jan,COVID-19,medium,5750
+2023,Jan,Dengue,low,345
+2023,Jan,Malaria,low,459
+2023,Jan,HIV/AIDS,low,575
+2023,Jan,Measles,low,114
+2023,Jan,Typhoid,low,690
+2023,Jan,Viral Flu,low,2300
+2023,Jan,Tuberculosis,medium,3449
+2023,Feb,COVID-19,medium,5750
+2023,Feb,Dengue,low,345
+2023,Feb,Malaria,low,459
+2023,Feb,HIV/AIDS,low,575
+2023,Feb,Measles,low,46
+2023,Feb,Typhoid,low,690
+2023,Feb,Viral Flu,low,2300
+2023,Feb,Tuberculosis,medium,3449
+2023,Mar,COVID-19,medium,5750
+2023,Mar,Dengue,low,345
+2023,Mar,Malaria,low,459
+2023,Mar,HIV/AIDS,low,575
+2023,Mar,Measles,low,46
+2023,Mar,Typhoid,low,690
+2023,Mar,Viral Flu,low,2300
+2023,Mar,Tuberculosis,medium,3449
+2023,Apr,COVID-19,medium,14374
+2023,Apr,Dengue,low,345
+2023,Apr,Malaria,low,459
+2023,Apr,HIV/AIDS,low,575
+2023,Apr,Measles,low,46
+2023,Apr,Typhoid,low,690
+2023,Apr,Viral Flu,low,2300
+2023,Apr,Tuberculosis,medium,3449
+2023,May,COVID-19,medium,14374
+2023,May,Dengue,low,345
+2023,May,Malaria,low,459
+2023,May,HIV/AIDS,low,575
+2023,May,Measles,low,46
+2023,May,Typhoid,low,690
+2023,May,Viral Flu,low,2300
+2023,May,Tuberculosis,medium,3449
+2023,Jun,COVID-19,medium,14374
+2023,Jun,Dengue,low,345
+2023,Jun,Malaria,low,459
+2023,Jun,HIV/AIDS,low,575
+2023,Jun,Measles,low,46
+2023,Jun,Typhoid,low,690
+2023,Jun,Viral Flu,medium,5750
+2023,Jun,Tuberculosis,medium,3449
+2023,Jul,COVID-19,medium,5750
+2023,Jul,Dengue,low,862
+2023,Jul,Malaria,low,1150
+2023,Jul,HIV/AIDS,low,575
+2023,Jul,Measles,low,46
+2023,Jul,Typhoid,low,1724
+2023,Jul,Viral Flu,medium,5750
+2023,Jul,Tuberculosis,medium,3449
+2023,Aug,COVID-19,medium,5750
+2023,Aug,Dengue,low,862
+2023,Aug,Malaria,low,1150
+2023,Aug,HIV/AIDS,low,575
+2023,Aug,Measles,low,46
+2023,Aug,Typhoid,low,1724
+2023,Aug,Viral Flu,medium,5750
+2023,Aug,Tuberculosis,medium,3449
+2023,Sep,COVID-19,medium,5750
+2023,Sep,Dengue,low,862
+2023,Sep,Malaria,low,1150
+2023,Sep,HIV/AIDS,low,575
+2023,Sep,Measles,low,46
+2023,Sep,Typhoid,low,1724
+2023,Sep,Viral Flu,low,2300
+2023,Sep,Tuberculosis,medium,3449
+2023,Oct,COVID-19,medium,5750
+2023,Oct,Dengue,low,862
+2023,Oct,Malaria,low,1150
+2023,Oct,HIV/AIDS,low,575
+2023,Oct,Measles,low,46
+2023,Oct,Typhoid,low,690
+2023,Oct,Viral Flu,low,2300
+2023,Oct,Tuberculosis,medium,3449
+2023,Nov,COVID-19,medium,5750
+2023,Nov,Dengue,low,345
+2023,Nov,Malaria,low,459
+2023,Nov,HIV/AIDS,low,575
+2023,Nov,Measles,low,114
+2023,Nov,Typhoid,low,690
+2023,Nov,Viral Flu,low,2300
+2023,Nov,Tuberculosis,medium,3449
+2023,Dec,COVID-19,medium,5750
+2023,Dec,Dengue,low,345
+2023,Dec,Malaria,low,459
+2023,Dec,HIV/AIDS,low,575
+2023,Dec,Measles,low,114
+2023,Dec,Typhoid,low,690
+2023,Dec,Viral Flu,low,2300
+2023,Dec,Tuberculosis,medium,3449
+2024,Jan,COVID-19,medium,6000
+2024,Jan,Dengue,low,360
+2024,Jan,Malaria,low,480
+2024,Jan,HIV/AIDS,low,600
+2024,Jan,Measles,low,120
+2024,Jan,Typhoid,low,720
+2024,Jan,Viral Flu,low,2400
+2024,Jan,Tuberculosis,medium,3600
+2024,Feb,COVID-19,medium,6000
+2024,Feb,Dengue,low,360
+2024,Feb,Malaria,low,480
+2024,Feb,HIV/AIDS,low,600
+2024,Feb,Measles,low,48
+2024,Feb,Typhoid,low,720
+2024,Feb,Viral Flu,low,2400
+2024,Feb,Tuberculosis,medium,3600
+2024,Mar,COVID-19,medium,6000
+2024,Mar,Dengue,low,360
+2024,Mar,Malaria,low,480
+2024,Mar,HIV/AIDS,low,600
+2024,Mar,Measles,low,48
+2024,Mar,Typhoid,low,720
+2024,Mar,Viral Flu,low,2400
+2024,Mar,Tuberculosis,medium,3600
+2024,Apr,COVID-19,medium,15000
+2024,Apr,Dengue,low,360
+2024,Apr,Malaria,low,480
+2024,Apr,HIV/AIDS,low,600
+2024,Apr,Measles,low,48
+2024,Apr,Typhoid,low,720
+2024,Apr,Viral Flu,low,2400
+2024,Apr,Tuberculosis,medium,3600
+2024,May,COVID-19,medium,15000
+2024,May,Dengue,low,360
+2024,May,Malaria,low,480
+2024,May,HIV/AIDS,low,600
+2024,May,Measles,low,48
+2024,May,Typhoid,low,720
+2024,May,Viral Flu,low,2400
+2024,May,Tuberculosis,medium,3600
+2024,Jun,COVID-19,medium,15000
+2024,Jun,Dengue,low,360
+2024,Jun,Malaria,low,480
+2024,Jun,HIV/AIDS,low,600
+2024,Jun,Measles,low,48
+2024,Jun,Typhoid,low,720
+2024,Jun,Viral Flu,medium,6000
+2024,Jun,Tuberculosis,medium,3600
+2024,Jul,COVID-19,medium,6000
+2024,Jul,Dengue,low,900
+2024,Jul,Malaria,low,1200
+2024,Jul,HIV/AIDS,low,600
+2024,Jul,Measles,low,48
+2024,Jul,Typhoid,low,1800
+2024,Jul,Viral Flu,medium,6000
+2024,Jul,Tuberculosis,medium,3600
+2024,Aug,COVID-19,medium,6000
+2024,Aug,Dengue,low,900
+2024,Aug,Malaria,low,1200
+2024,Aug,HIV/AIDS,low,600
+2024,Aug,Measles,low,48
+2024,Aug,Typhoid,low,1800
+2024,Aug,Viral Flu,medium,6000
+2024,Aug,Tuberculosis,medium,3600
+2024,Sep,COVID-19,medium,6000
+2024,Sep,Dengue,low,900
+2024,Sep,Malaria,low,1200
+2024,Sep,HIV/AIDS,low,600
+2024,Sep,Measles,low,48
+2024,Sep,Typhoid,low,1800
+2024,Sep,Viral Flu,low,2400
+2024,Sep,Tuberculosis,medium,3600
+2024,Oct,COVID-19,medium,6000
+2024,Oct,Dengue,low,900
+2024,Oct,Malaria,low,1200
+2024,Oct,HIV/AIDS,low,600
+2024,Oct,Measles,low,48
+2024,Oct,Typhoid,low,720
+2024,Oct,Viral Flu,low,2400
+2024,Oct,Tuberculosis,medium,3600
+2024,Nov,COVID-19,medium,6000
+2024,Nov,Dengue,low,360
+2024,Nov,Malaria,low,480
+2024,Nov,HIV/AIDS,low,600
+2024,Nov,Measles,low,120
+2024,Nov,Typhoid,low,720
+2024,Nov,Viral Flu,low,2400
+2024,Nov,Tuberculosis,medium,3600
+2024,Dec,COVID-19,medium,6000
+2024,Dec,Dengue,low,360
+2024,Dec,Malaria,low,480
+2024,Dec,HIV/AIDS,low,600
+2024,Dec,Measles,low,120
+2024,Dec,Typhoid,low,720
+2024,Dec,Viral Flu,low,2400
+2024,Dec,Tuberculosis,medium,3600

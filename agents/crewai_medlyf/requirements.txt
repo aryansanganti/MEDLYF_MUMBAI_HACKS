@@ -1,0 +1,7 @@
+crewai
+redis
+pandas
+joblib
+aiohttp
+prophet; platform_system!='Windows'
+statsmodels

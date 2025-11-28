@@ -1,0 +1,15 @@
+[project]
+name = "medlyf-crew"
+version = "0.1.0"
+dependencies = [
+  "crewai",
+  "redis",
+  "pandas",
+  "joblib",
+  "aiohttp",
+  "statsmodels",
+  "prophet; platform_system!='Windows'"
+]
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
