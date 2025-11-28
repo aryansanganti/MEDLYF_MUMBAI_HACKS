@@ -18,6 +18,7 @@ import {
   Download,
   Building2,
   Cylinder,
+  Cloud, // Added Cloud icon for AQI
 } from "lucide-react";
 import {
   RadialBarChart,
@@ -32,6 +33,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+
+// --- AQI API Constants ---
+// NOTE: ⚠️ REPLACE 'YOUR_ACTUAL_OPENWEATHERMAP_API_KEY' with your real key.
+const OPENWEATHER_API_KEY = "caf0c12698e8da12149be681c389a77c";
+// Coordinates for Pune, India (can be changed)
+const LATITUDE = 18.5204;
+const LONGITUDE = 73.8567;
+const AQI_API_URL = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${OPENWEATHER_API_KEY}`;
+// -------------------------
+
 
 interface DashboardMetric {
   id: string;
@@ -51,6 +62,19 @@ interface DashboardAlert {
   timestamp: string;
   language: "en" | "hi" | "es" | "local";
 }
+
+// Function to determine AQI level and color based on OpenWeather standard (1-5)
+// We scale it up (e.g., * 50) only for descriptive labeling if needed, 
+// but use the actual 1-5 index for the display value.
+const getAqiStatus = (aqiIndex: number) => {
+  if (aqiIndex === 1) return { status: "success" as const, label: "Good" };
+  if (aqiIndex === 2) return { status: "neutral" as const, label: "Fair" };
+  if (aqiIndex === 3) return { status: "warning" as const, label: "Moderate" };
+  if (aqiIndex === 4) return { status: "warning" as const, label: "Poor" };
+  if (aqiIndex === 5) return { status: "error" as const, label: "Very Poor" };
+  return { status: "neutral" as const, label: "Unknown" };
+};
+
 
 const DashboardCard = ({ metric }: { metric: DashboardMetric }) => (
   <div className="stat-card hover:border-primary/50 transition-all">
@@ -250,6 +274,9 @@ export default function Dashboard() {
   const [refreshTime, setRefreshTime] = useState<string>(
     new Date().toLocaleTimeString(),
   );
+  // State for AQI data
+  const [aqiData, setAqiData] = useState<DashboardMetric | null>(null);
+
 
   const toggleLanguage = () => {
     const langs = ["en", "hi", "mr", "te"];
@@ -258,14 +285,70 @@ export default function Dashboard() {
     i18n.changeLanguage(langs[nextIndex]);
   };
 
+  // Function to fetch AQI data
+  const fetchAQI = async () => {
+    try {
+      // Check if the API key is set before fetching
+      if (OPENWEATHER_API_KEY === "caf0c12698e8da12149be681c389a77c") {
+        console.warn("⚠️ Using mock AQI data. Please set a valid OPENWEATHER_API_KEY for live data.");
+        // Mock data fallback
+        const mockAQI = Math.floor(Math.random() * 5) + 1; // 1 to 5
+        const aqiStatus = getAqiStatus(mockAQI);
+
+        setAqiData({
+          id: "aqi",
+          label: t("air_quality_index") || "Air Quality Index",
+          value: mockAQI,
+          unit: `${aqiStatus.label} (1-5)`,
+          trend: 2.5,
+          status: aqiStatus.status,
+          icon: <Cloud className={`w-5 h-5 text-${aqiStatus.status}`} />,
+        });
+        return;
+      }
+
+      const response = await fetch(AQI_API_URL);
+      if (!response.ok) throw new Error("Failed to fetch AQI data");
+
+      const data = await response.json();
+      const currentAQI = data.list[0].main.aqi; // AQI value from 1 to 5
+      const aqiStatus = getAqiStatus(currentAQI);
+
+      setAqiData({
+        id: "aqi",
+        label: t("air_quality_index") || "Air Quality Index",
+        value: currentAQI,
+        unit: `${aqiStatus.label} (1-5)`,
+        trend: 2.5, // Placeholder trend
+        status: aqiStatus.status,
+        icon: <Cloud className={`w-5 h-5 text-${aqiStatus.status}`} />,
+      });
+    } catch (error) {
+      console.error("Error fetching AQI:", error);
+      // Fallback for error
+      setAqiData({
+        id: "aqi",
+        label: t("air_quality_index") || "Air Quality Index",
+        value: "N/A",
+        unit: t("error") || "Error",
+        trend: 0,
+        status: "error",
+        icon: <Cloud className="w-5 h-5 text-error" />,
+      });
+    }
+  };
+
   useEffect(() => {
     if (!user) {
       navigate("/login");
       return;
     }
 
-    // Simulate loading
-    setTimeout(() => setIsLoading(false), 800);
+    // Simulate loading and fetch AQI after
+    setTimeout(() => {
+      setIsLoading(false);
+      fetchAQI();
+    }, 800);
 
     // Auto-refresh timestamp every second
     const interval = setInterval(() => {
@@ -288,7 +371,38 @@ export default function Dashboard() {
     );
   }
 
-  const metrics: DashboardMetric[] = []; // Metrics are now rendered individually with charts
+  // List of primary metrics, including AQI if available
+  const primaryMetrics: DashboardMetric[] = [
+    ...(aqiData ? [aqiData] : []), // AQI Metric comes first
+    {
+      id: "icu_summary",
+      label: t("icu_beds_occupied") || "ICU Beds Occupied",
+      value: 847,
+      unit: t("beds") || "beds",
+      trend: 4.2,
+      status: "warning",
+      icon: <Users className="w-5 h-5 text-warning" />,
+    },
+    {
+      id: "oxygen_summary",
+      label: t("oxygen_in_stock") || "Oxygen In Stock",
+      value: "5,620",
+      unit: t("cylinders") || "cylinders",
+      trend: 7.1,
+      status: "success",
+      icon: <Activity className="w-5 h-5 text-success" />,
+    },
+    {
+      id: "deliveries_summary",
+      label: t("active_deliveries") || "Active Deliveries",
+      value: 34,
+      unit: t("shipments") || "shipments",
+      trend: 1.5,
+      status: "neutral",
+      icon: <Truck className="w-5 h-5 text-neutral" />,
+    },
+  ];
+
 
   // Mock Data for Charts
   const icuData = [
@@ -394,7 +508,13 @@ export default function Dashboard() {
                   {i18n.language.toUpperCase()}
                 </button>
 
-                <button className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium">
+                <button
+                  onClick={() => {
+                    fetchAQI(); // Refresh AQI
+                    setRefreshTime(new Date().toLocaleTimeString());
+                  }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium"
+                >
                   <RefreshCw className="w-4 h-4" />
                   {t("refresh")}
                 </button>
@@ -420,6 +540,14 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
+
+          {/* Key Metrics Grid (Summary Cards) - Now includes AQI */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {primaryMetrics.map(metric => (
+              <DashboardCard key={metric.id} metric={metric} />
+            ))}
+          </div>
+
           {/* Key Metrics Grid with Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {/* ICU Beds - Radial Bar Chart */}
