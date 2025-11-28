@@ -16,6 +16,8 @@ import {
   RefreshCw,
   Languages,
   Download,
+  Building2,
+  Cylinder,
 } from "lucide-react";
 import {
   RadialBarChart,
@@ -153,6 +155,37 @@ const HospitalNetworkCard = ({
   oxygenLevel: number;
 }) => {
   const { t } = useTranslation();
+
+  // Determine status and icon
+  let status: "critical" | "warning" | "good" = "good";
+  if (occupancy > 80 || oxygenLevel < 30) {
+    status = "critical";
+  } else if (occupancy > 60 || oxygenLevel < 50) {
+    status = "warning";
+  }
+
+  const getStatusIcon = () => {
+    switch (status) {
+      case "critical":
+        return <Building2 className="w-5 h-5 text-error" />;
+      case "warning":
+        return <Building2 className="w-5 h-5 text-warning" />;
+      case "good":
+        return <Building2 className="w-5 h-5 text-success" />;
+    }
+  };
+
+  const getStatusBg = () => {
+    switch (status) {
+      case "critical":
+        return "bg-error/20";
+      case "warning":
+        return "bg-warning/20";
+      case "good":
+        return "bg-success/20";
+    }
+  };
+
   return (
     <div className="rounded-lg border border-border p-4 hover:border-primary/50 hover:shadow-md transition-all">
       <div className="flex items-start justify-between mb-3">
@@ -163,8 +196,8 @@ const HospitalNetworkCard = ({
             {city}
           </div>
         </div>
-        <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center">
-          <Activity className="w-5 h-5 text-primary" />
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${getStatusBg()}`}>
+          {getStatusIcon()}
         </div>
       </div>
 
@@ -446,7 +479,7 @@ export default function Dashboard() {
                   {t("oxygen_in_stock")}
                 </h3>
                 <div className="p-2 rounded-lg bg-success/10">
-                  <Activity className="w-5 h-5 text-success" />
+                  <Cylinder className="w-5 h-5 text-success" />
                 </div>
               </div>
               <div className="h-[200px] w-full">
@@ -528,47 +561,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Two Column Layout */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Alerts Column */}
-            <div className="lg:col-span-1">
-              <div className="rounded-xl border border-border p-6 bg-card">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-warning" />
-                  {t("active_alerts")}
-                </h2>
-
-                <div className="space-y-4">
-                  {alerts.map((alert) => (
-                    <AlertItem key={alert.id} alert={alert} />
-                  ))}
-                </div>
-
-                <button className="w-full mt-4 px-4 py-2 text-center text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">
-                  {t("view_all_alerts")}
-                </button>
-              </div>
-            </div>
-
-            {/* Hospital Network Column */}
-            <div className="lg:col-span-2">
-              <div className="rounded-xl border border-border p-6 bg-card">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <MapPin className="w-5 h-5" />
-                  {t("hospital_network_status")}
-                </h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {hospitals.map((hospital) => (
-                    <HospitalNetworkCard key={hospital.name} {...hospital} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Predictions Section */}
-          <div className="mt-8 rounded-xl border border-border p-6 bg-card">
+          <div className="mb-8 rounded-xl border border-border p-6 bg-card">
             <h2 className="text-xl font-bold mb-4">
               {t("ai_predictions")}
             </h2>
@@ -624,6 +618,45 @@ export default function Dashboard() {
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Alerts Column */}
+            <div className="lg:col-span-1">
+              <div className="rounded-xl border border-border p-6 bg-card">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-warning" />
+                  {t("active_alerts")}
+                </h2>
+
+                <div className="space-y-4">
+                  {alerts.map((alert) => (
+                    <AlertItem key={alert.id} alert={alert} />
+                  ))}
+                </div>
+
+                <button className="w-full mt-4 px-4 py-2 text-center text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">
+                  {t("view_all_alerts")}
+                </button>
+              </div>
+            </div>
+
+            {/* Hospital Network Column */}
+            <div className="lg:col-span-2">
+              <div className="rounded-xl border border-border p-6 bg-card">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  {t("hospital_network_status")}
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {hospitals.map((hospital) => (
+                    <HospitalNetworkCard key={hospital.name} {...hospital} />
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
 

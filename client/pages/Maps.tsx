@@ -322,9 +322,9 @@ const Maps = () => {
 
     return (
         <Layout authenticated={true}>
-            <div className="relative w-full h-[calc(100vh-80px)] md:h-screen flex">
+            <div className="relative w-full  h-[calc(100vh-80px)] md:h-screen flex">
                 {/* Map Area */}
-                <div className="flex-grow h-full relative">
+                <div className="flex-grow relative">
                     <Map
                         {...viewState}
                         onMove={(evt) => setViewState(evt.viewState)}
@@ -556,7 +556,7 @@ const Maps = () => {
                 <div className="w-96 bg-background border-l border-border h-full overflow-y-auto p-4 hidden md:block">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold flex items-center gap-2">
-                            <Activity className="text-primary" /> Logistics
+                            <Truck className="text-primary" /> Logistics
                         </h2>
                         <Button size="sm" onClick={createJob} variant="destructive">
                             <AlertTriangle className="w-4 h-4 mr-2" />
