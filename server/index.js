@@ -249,6 +249,7 @@ app.get("/api/health", (req, res) => {
    OPTIMIZATION AGENT ROUTE
 ============================================================ */
 const OptimizationPrediction = require('./models/OptimizationPrediction');
+const Prediction = require('./models/Prediction');
 
 // GET: Fetch the latest optimization plan from DB
 app.get('/api/optimization/plan', async (req, res) => {
@@ -278,6 +279,17 @@ app.post('/api/optimization/generate', async (req, res) => {
     } catch (err) {
         console.error("Agent Error:", err);
         res.status(500).json({ error: "Agent failed to generate plan" });
+    }
+});
+
+// GET: Fetch all predictions
+app.get('/api/predictions', async (req, res) => {
+    try {
+        const predictions = await Prediction.find().sort({ predicted_date: 1 });
+        res.json(predictions);
+    } catch (err) {
+        console.error("Error fetching predictions:", err);
+        res.status(500).json({ error: "Failed to fetch predictions" });
     }
 });
 

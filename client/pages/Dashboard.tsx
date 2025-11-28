@@ -19,6 +19,7 @@ import {
   Building2,
   Cylinder,
   Cloud, // Added Cloud icon for AQI
+  Sparkles,
 } from "lucide-react";
 import {
   RadialBarChart,
@@ -44,6 +45,27 @@ const LONGITUDE = 73.8567;
 const AQI_API_URL = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${OPENWEATHER_API_KEY}`;
 // -------------------------
 
+
+const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+const apiUrl = (isLocal ? "http://localhost:5001" : (import.meta.env.VITE_API_URL || "http://localhost:5001")).replace(/\/$/, "");
+
+interface Hospital {
+  name: string;
+  city: string;
+  icuBeds: number;
+  occupancy: number;
+  oxygenLevel: number;
+}
+
+interface Prediction {
+  _id: string;
+  disease: string;
+  predicted_date: string;
+  predicted_cases: number;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  confidence: number;
+  ai_analysis: string;
+}
 
 interface DashboardMetric {
   id: string;
@@ -271,7 +293,9 @@ export default function Dashboard() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
-  const [isLoading, setIsLoading] = useState(true);
+  const [hospitals, setHospitals] = useState<Hospital[]>([]);
+  const [predictions, setPredictions] = useState<Prediction[]>([]);
+  const [loading, setLoading] = useState(true);
   const [refreshTime, setRefreshTime] = useState<string>(
     new Date().toLocaleTimeString(),
   );
@@ -339,17 +363,36 @@ export default function Dashboard() {
     }
   };
 
+  const fetchHospitals = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/api/hospitals`);
+      if (!res.ok) throw new Error("Failed to fetch hospitals");
+      const data = await res.json();
+      setHospitals(data);
+    } catch (error) {
+      console.error("Error fetching hospitals:", error);
+    }
+  };
+
+  const fetchPredictions = async () => {
+    try {
+      const res = await fetch(`${apiUrl}/api/predictions`);
+      if (!res.ok) throw new Error("Failed to fetch predictions");
+      const data = await res.json();
+      setPredictions(data);
+    } catch (error) {
+      console.error("Error fetching predictions:", error);
+    }
+  };
+
   useEffect(() => {
     if (!user) {
       navigate("/login");
       return;
     }
 
-    // Simulate loading and fetch AQI after
-    setTimeout(() => {
-      setIsLoading(false);
-      fetchAQI();
-    }, 800);
+    setLoading(true);
+    Promise.all([fetchAQI(), fetchHospitals(), fetchPredictions()]).finally(() => setLoading(false));
 
     // Auto-refresh timestamp every second
     const interval = setInterval(() => {
@@ -359,7 +402,7 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [user, navigate]);
 
-  if (isLoading) {
+  if (loading) {
     return (
       <Layout authenticated={true} onLogout={logout}>
         <div className="min-h-[calc(100vh-200px)] flex items-center justify-center">
@@ -397,64 +440,7 @@ export default function Dashboard() {
     { name: "Delivered", value: 14, color: "#22c55e" },
   ];
 
-  const alerts: DashboardAlert[] = [
-    {
-      id: "1",
-      hospital: "City Medical Center, Pune",
-      message:
-        "ICU occupancy approaching critical capacity. Recommend activating surge protocol.",
-      severity: "critical",
-      timestamp: "5 mins ago",
-      language: "en",
-    },
-    {
-      id: "2",
-      hospital: "District Hospital, Nagpur",
-      message: "अक्सीजन का स्टॉक 72 घंटे तक सीमित। तुरंत रीफिल का अनुरोध।",
-      severity: "warning",
-      timestamp: "12 mins ago",
-      language: "hi",
-    },
-    {
-      id: "3",
-      hospital: "Rural Medical Complex, Aurangabad",
-      message: "Nuevo envío de suministros llegará en 4 horas. Sistema listo.",
-      severity: "info",
-      timestamp: "30 mins ago",
-      language: "es",
-    },
-  ];
 
-  const hospitals = [
-    {
-      name: "City Medical Center",
-      city: "Pune",
-      icuBeds: 120,
-      occupancy: 85,
-      oxygenLevel: 45,
-    },
-    {
-      name: "District Hospital",
-      city: "Nagpur",
-      icuBeds: 85,
-      occupancy: 72,
-      oxygenLevel: 38,
-    },
-    {
-      name: "Rural Medical Complex",
-      city: "Aurangabad",
-      icuBeds: 60,
-      occupancy: 56,
-      oxygenLevel: 68,
-    },
-    {
-      name: "Community Health Center",
-      city: "Solapur",
-      icuBeds: 40,
-      occupancy: 48,
-      oxygenLevel: 82,
-    },
-  ];
 
   return (
     <Layout authenticated={true} onLogout={logout}>
@@ -675,23 +661,41 @@ export default function Dashboard() {
 
           {/* Two Column Layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Alerts Column */}
+            {/* Prediction Collection Column */}
             <div className="lg:col-span-1">
-              <div className="rounded-xl border border-border p-6 bg-card">
+              <div className="rounded-xl border border-border p-6 bg-card h-full">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <AlertTriangle className="w-5 h-5 text-warning" />
-                  {t("active_alerts")}
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  Prediction Collection
                 </h2>
 
-                <div className="space-y-4">
-                  {alerts.map((alert) => (
-                    <AlertItem key={alert.id} alert={alert} />
-                  ))}
+                <div className="space-y-4 max-h-[280px] overflow-y-auto pr-2 custom-scrollbar">
+                  {predictions.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">No predictions available.</p>
+                  ) : (
+                    predictions.map((prediction) => (
+                      <div key={prediction._id} className="p-3 rounded-lg border border-border bg-card/50 hover:bg-card transition-colors">
+                        <div className="flex items-center justify-between mb-2">
+                          <h3 className="font-bold text-sm">{prediction.disease}</h3>
+                          <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${prediction.severity === 'critical' ? 'bg-red-100 text-red-600 dark:bg-red-900/30' :
+                            prediction.severity === 'high' ? 'bg-orange-100 text-orange-600 dark:bg-orange-900/30' :
+                              prediction.severity === 'medium' ? 'bg-yellow-100 text-yellow-600 dark:bg-yellow-900/30' :
+                                'bg-green-100 text-green-600 dark:bg-green-900/30'
+                            }`}>
+                            {prediction.severity}
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-xs text-muted-foreground mb-2">
+                          <span>Date: {prediction.predicted_date}</span>
+                          <span>Cases: {prediction.predicted_cases}</span>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground italic line-clamp-2" title={prediction.ai_analysis}>
+                          "{prediction.ai_analysis}"
+                        </p>
+                      </div>
+                    ))
+                  )}
                 </div>
-
-                <button className="w-full mt-4 px-4 py-2 text-center text-sm font-medium text-primary border border-primary rounded-lg hover:bg-primary/5 transition-colors">
-                  {t("view_all_alerts")}
-                </button>
               </div>
             </div>
 
@@ -703,7 +707,7 @@ export default function Dashboard() {
                   {t("hospital_network_status")}
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[380px] overflow-y-auto pr-2 custom-scrollbar">
                   {hospitals.map((hospital) => (
                     <HospitalNetworkCard key={hospital.name} {...hospital} />
                   ))}
