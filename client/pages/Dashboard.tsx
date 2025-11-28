@@ -17,6 +17,19 @@ import {
   Languages,
   Download,
 } from "lucide-react";
+import {
+  RadialBarChart,
+  RadialBar,
+  AreaChart,
+  Area,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 interface DashboardMetric {
   id: string;
@@ -242,61 +255,28 @@ export default function Dashboard() {
     );
   }
 
-  const metrics: DashboardMetric[] = [
-    {
-      id: "icu-beds",
-      label: t("icu_beds_occupied"),
-      value: 847,
-      unit: t("beds"),
-      trend: 12,
-      status: "warning",
-      icon: <Users className="w-5 h-5 text-warning" />,
-    },
-    {
-      id: "oxygen-demand",
-      label: t("oxygen_demand"),
-      value: 2340,
-      unit: t("cyl_day"),
-      trend: 8,
-      status: "warning",
-      icon: <Zap className="w-5 h-5 text-warning" />,
-    },
-    {
-      id: "oxygen-stock",
-      label: t("oxygen_in_stock"),
-      value: 5620,
-      unit: t("cyl"),
-      trend: -5,
-      status: "success",
-      icon: <Activity className="w-5 h-5 text-success" />,
-    },
-    {
-      id: "resource-util",
-      label: t("resource_utilization"),
-      value: 82,
-      unit: "%",
-      trend: 3,
-      status: "warning",
-      icon: <TrendingUp className="w-5 h-5 text-warning" />,
-    },
-    {
-      id: "logistics-active",
-      label: t("active_deliveries"),
-      value: 34,
-      unit: t("shipments"),
-      trend: 15,
-      status: "success",
-      icon: <Truck className="w-5 h-5 text-success" />,
-    },
-    {
-      id: "forecast-accuracy",
-      label: t("forecast_accuracy"),
-      value: 87,
-      unit: "%",
-      trend: 2,
-      status: "success",
-      icon: <TrendingUp className="w-5 h-5 text-success" />,
-    },
+  const metrics: DashboardMetric[] = []; // Metrics are now rendered individually with charts
+
+  // Mock Data for Charts
+  const icuData = [
+    { name: "Occupied", value: 847, fill: "#ef4444" },
+    { name: "Free", value: 153, fill: "#e5e7eb" },
+  ];
+
+  const oxygenData = [
+    { name: "Day 1", value: 4000 },
+    { name: "Day 2", value: 3000 },
+    { name: "Day 3", value: 2000 },
+    { name: "Day 4", value: 2780 },
+    { name: "Day 5", value: 1890 },
+    { name: "Day 6", value: 2390 },
+    { name: "Day 7", value: 5620 },
+  ];
+
+  const deliveryData = [
+    { name: "En Route", value: 12, color: "#3b82f6" },
+    { name: "Pending", value: 8, color: "#f97316" },
+    { name: "Delivered", value: 14, color: "#22c55e" },
   ];
 
   const alerts: DashboardAlert[] = [
@@ -407,11 +387,145 @@ export default function Dashboard() {
 
         {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
-          {/* Key Metrics Grid */}
+          {/* Key Metrics Grid with Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {metrics.map((metric) => (
-              <DashboardCard key={metric.id} metric={metric} />
-            ))}
+            {/* ICU Beds - Radial Bar Chart */}
+            <div className="stat-card hover:border-primary/50 transition-all p-4 rounded-xl border border-border bg-card">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {t("icu_beds_occupied")}
+                </h3>
+                <div className="p-2 rounded-lg bg-warning/10">
+                  <Users className="w-5 h-5 text-warning" />
+                </div>
+              </div>
+              <div className="h-[200px] w-full relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RadialBarChart
+                    cx="50%"
+                    cy="50%"
+                    innerRadius="60%"
+                    outerRadius="100%"
+                    barSize={15}
+                    data={icuData}
+                    startAngle={180}
+                    endAngle={0}
+                  >
+                    <RadialBar
+                      background
+                      dataKey="value"
+                      cornerRadius={10}
+                    />
+                    <text
+                      x="50%"
+                      y="50%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-foreground text-2xl font-bold"
+                    >
+                      847
+                    </text>
+                    <text
+                      x="50%"
+                      y="65%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-muted-foreground text-xs"
+                    >
+                      {t("beds")}
+                    </text>
+                  </RadialBarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Oxygen Stock - Gradient Area Chart */}
+            <div className="stat-card hover:border-primary/50 transition-all p-4 rounded-xl border border-border bg-card">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {t("oxygen_in_stock")}
+                </h3>
+                <div className="p-2 rounded-lg bg-success/10">
+                  <Activity className="w-5 h-5 text-success" />
+                </div>
+              </div>
+              <div className="h-[200px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={oxygenData}>
+                    <defs>
+                      <linearGradient id="colorOxygen" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#22c55e" stopOpacity={0.8} />
+                        <stop offset="95%" stopColor="#22c55e" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
+                      itemStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#22c55e"
+                      fillOpacity={1}
+                      fill="url(#colorOxygen)"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+
+            {/* Active Deliveries - Donut Chart */}
+            <div className="stat-card hover:border-primary/50 transition-all p-4 rounded-xl border border-border bg-card">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="text-sm font-medium text-muted-foreground">
+                  {t("active_deliveries")}
+                </h3>
+                <div className="p-2 rounded-lg bg-success/10">
+                  <Truck className="w-5 h-5 text-success" />
+                </div>
+              </div>
+              <div className="h-[200px] w-full relative">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={deliveryData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {deliveryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      contentStyle={{ backgroundColor: "hsl(var(--card))", borderColor: "hsl(var(--border))" }}
+                      itemStyle={{ color: "hsl(var(--foreground))" }}
+                    />
+                    <text
+                      x="50%"
+                      y="50%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-foreground text-2xl font-bold"
+                    >
+                      34
+                    </text>
+                    <text
+                      x="50%"
+                      y="65%"
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="fill-muted-foreground text-xs"
+                    >
+                      {t("shipments")}
+                    </text>
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
 
           {/* Two Column Layout */}
