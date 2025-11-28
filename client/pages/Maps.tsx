@@ -4,7 +4,8 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Activity, Wind, MapPin, AlertTriangle, RefreshCw, Truck, Box, Clock, CheckCircle, XCircle, Navigation, Hospital } from 'lucide-react';
+import { Activity, Wind, MapPin, AlertTriangle, RefreshCw, Truck, Box, Clock, CheckCircle, XCircle, Navigation, Hospital, Store, X } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 import { Layout } from '@/components/Layout';
 import { io, Socket } from 'socket.io-client';
 
@@ -361,7 +362,9 @@ const Maps = () => {
                                 anchor="bottom"
                             >
                                 <div className="flex flex-col items-center">
-                                    <Box className="w-6 h-6 text-purple-500 fill-current" />
+                                    <div className="p-2 rounded-full bg-purple-500 shadow-lg border-2 border-white">
+                                        <Store className="w-5 h-5 text-white" />
+                                    </div>
                                     <span className="text-[10px] bg-black/50 text-white px-1 rounded mt-1">{vendor.name}</span>
                                 </div>
                             </Marker>
@@ -464,12 +467,85 @@ const Maps = () => {
                                 longitude={popupInfo.longitude}
                                 latitude={popupInfo.latitude}
                                 onClose={() => setPopupInfo(null)}
-                                className="text-black"
+                                className="z-50 custom-popup"
                             >
-                                <div className="p-2">
-                                    <h3 className="font-bold">{popupInfo.name}</h3>
-                                    <p>ICU: {popupInfo.icuOccupancy}%</p>
-                                </div>
+                                <style>{`
+                                    .custom-popup .mapboxgl-popup-content {
+                                        padding: 0 !important;
+                                        background: transparent !important;
+                                        box-shadow: none !important;
+                                    }
+                                    .custom-popup .mapboxgl-popup-close-button {
+                                        display: none !important;
+                                    }
+                                    .custom-popup .mapboxgl-popup-tip {
+                                        border-top-color: rgba(255, 255, 255, 0.95);
+                                    }
+                                    :global(.dark) .custom-popup .mapboxgl-popup-tip {
+                                        border-top-color: rgba(15, 23, 42, 0.95);
+                                    }
+                                `}</style>
+                                <Card className="w-80 border-0 shadow-2xl bg-white/95 backdrop-blur-md dark:bg-slate-900/95 animate-in fade-in zoom-in-95 duration-200">
+                                    <CardHeader className="p-4 pb-2 flex flex-row items-start justify-between space-y-0">
+                                        <div>
+                                            <CardTitle className="text-lg font-bold leading-tight pr-4">
+                                                {popupInfo.name}
+                                            </CardTitle>
+                                            <Badge
+                                                variant={popupInfo.status === 'critical' ? 'destructive' : 'secondary'}
+                                                className={`mt-2 ${popupInfo.status === 'good' ? 'bg-green-500 hover:bg-green-600' : ''}`}
+                                            >
+                                                {popupInfo.status?.toUpperCase() || 'UNKNOWN'}
+                                            </Badge>
+                                        </div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-6 w-6 -mt-1 -mr-2 text-muted-foreground hover:text-foreground rounded-full"
+                                            onClick={() => setPopupInfo(null)}
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </Button>
+                                    </CardHeader>
+                                    <CardContent className="p-4 pt-2 space-y-4">
+                                        <div className="space-y-1.5">
+                                            <div className="flex justify-between text-sm font-medium">
+                                                <span className="text-muted-foreground flex items-center gap-1">
+                                                    <Activity className="w-3 h-3" /> ICU Occupancy
+                                                </span>
+                                                <span className={
+                                                    popupInfo.icuOccupancy > 80 ? 'text-red-500' :
+                                                        popupInfo.icuOccupancy > 50 ? 'text-orange-500' : 'text-green-500'
+                                                }>
+                                                    {popupInfo.icuOccupancy}%
+                                                </span>
+                                            </div>
+                                            <Progress
+                                                value={popupInfo.icuOccupancy}
+                                                className={`h-2 ${popupInfo.icuOccupancy > 80 ? '[&>*]:bg-red-500' :
+                                                    popupInfo.icuOccupancy > 50 ? '[&>*]:bg-orange-500' : '[&>*]:bg-green-500'
+                                                    }`}
+                                            />
+                                        </div>
+
+                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                            <div className="bg-muted/50 p-2 rounded flex flex-col items-center justify-center text-center">
+                                                <Wind className="w-4 h-4 mb-1 text-blue-500" />
+                                                <span className="text-muted-foreground">Oxygen</span>
+                                                <span className="font-bold">Available</span>
+                                            </div>
+                                            <div className="bg-muted/50 p-2 rounded flex flex-col items-center justify-center text-center">
+                                                <Clock className="w-4 h-4 mb-1 text-orange-500" />
+                                                <span className="text-muted-foreground">Wait Time</span>
+                                                <span className="font-bold">15m</span>
+                                            </div>
+                                        </div>
+
+                                        <Button className="w-full h-8 text-xs" size="sm">
+                                            View Dashboard
+                                        </Button>
+                                    </CardContent>
+                                </Card>
                             </Popup>
                         )}
                     </Map>
