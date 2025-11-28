@@ -4,7 +4,7 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Activity, Wind, MapPin, AlertTriangle, RefreshCw, Truck, Box, Clock, CheckCircle, XCircle, Navigation } from 'lucide-react';
+import { Activity, Wind, MapPin, AlertTriangle, RefreshCw, Truck, Box, Clock, CheckCircle, XCircle, Navigation, Hospital } from 'lucide-react';
 import { Layout } from '@/components/Layout';
 import { io, Socket } from 'socket.io-client';
 
@@ -308,11 +308,11 @@ const Maps = () => {
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'critical': return 'text-red-500';
-            case 'warning': return 'text-orange-500';
-            case 'stable': return 'text-blue-500';
-            case 'good': return 'text-green-500';
-            default: return 'text-gray-500';
+            case 'critical': return 'bg-red-500';
+            case 'warning': return 'bg-orange-500';
+            case 'stable': return 'bg-blue-500';
+            case 'good': return 'bg-green-500';
+            default: return 'bg-gray-500';
         }
     };
 
@@ -346,7 +346,9 @@ const Maps = () => {
                                     setPopupInfo(hospital);
                                 }}
                             >
-                                <MapPin className={`w-8 h-8 ${getStatusColor(hospital.status)} cursor-pointer hover:scale-110 transition-transform`} fill="currentColor" />
+                                <div className={`p-2 rounded-full ${getStatusColor(hospital.status)} shadow-lg border-2 border-white cursor-pointer hover:scale-110 transition-transform`}>
+                                    <Hospital className="w-5 h-5 text-white" />
+                                </div>
                             </Marker>
                         ))}
 
