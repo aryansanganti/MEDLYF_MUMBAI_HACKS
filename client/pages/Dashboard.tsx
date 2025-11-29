@@ -459,8 +459,8 @@ export default function Dashboard() {
 
   // --- MOCK DATA ---
   const icuData = [
-    { name: "Occupied", value: 847, fill: "#ef4444" },
-    { name: "Free", value: 153, fill: "#e5e7eb" },
+    { name: "Occupied", value: 300, fill: "#ef4444" },
+    { name: "Free", value: 153, fill: "#ff9564ff" },
   ];
 
   const oxygenData = [
