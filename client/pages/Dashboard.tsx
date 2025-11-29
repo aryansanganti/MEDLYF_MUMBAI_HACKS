@@ -19,8 +19,8 @@ import {
   Building2,
   Cylinder,
   Cloud,
-  ChevronDown, 
-  Calendar,    
+  ChevronDown,
+  Calendar,
   Sparkles,
 } from "lucide-react";
 import {
@@ -44,16 +44,20 @@ const LATITUDE = 18.9582;
 const LONGITUDE = 72.8321;
 
 const WEATHER_API_URL = `https://api.weatherapi.com/v1/forecast.json?key=${WEATHERAPI_KEY}&q=${LATITUDE},${LONGITUDE}&days=8&aqi=yes&alerts=no`;
-  
+
 
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const apiUrl = (isLocal ? "http://localhost:5001" : (import.meta.env.VITE_API_URL || "http://localhost:5001")).replace(/\/$/, "");
 interface Hospital {
+  _id: string;
   name: string;
   city: string;
-  icuBeds: number;
-  occupancy: number;
+  icuOccupancy: number;
   oxygenLevel: number;
+  status: string;
+  icuBeds: number;
+  latitude: number;
+  longitude: number;
 }
 
 interface Prediction {
@@ -211,22 +215,30 @@ const HospitalNetworkCard = ({
   name,
   city,
   icuBeds,
-  occupancy,
+  icuOccupancy,
   oxygenLevel,
+  status: propStatus,
 }: {
   name: string;
   city: string;
   icuBeds: number;
-  occupancy: number;
+  icuOccupancy: number;
   oxygenLevel: number;
+  status?: string;
 }) => {
   const { t } = useTranslation();
 
   let status: "critical" | "warning" | "good" = "good";
-  if (occupancy > 80 || oxygenLevel < 30) {
-    status = "critical";
-  } else if (occupancy > 60 || oxygenLevel < 50) {
-    status = "warning";
+  if (propStatus) {
+    if (propStatus === 'critical') status = 'critical';
+    else if (propStatus === 'warning') status = 'warning';
+    else status = 'good';
+  } else {
+    if (icuOccupancy > 80 || oxygenLevel < 30) {
+      status = "critical";
+    } else if (icuOccupancy > 60 || oxygenLevel < 50) {
+      status = "warning";
+    }
   }
 
   const getStatusIcon = () => {
@@ -264,12 +276,12 @@ const HospitalNetworkCard = ({
         <div>
           <div className="flex items-center justify-between mb-1 text-xs font-medium">
             <span>{t("icu_beds_label")}: {icuBeds}</span>
-            <span className="text-muted-foreground">{occupancy}%</span>
+            <span className="text-muted-foreground">{icuOccupancy}%</span>
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full ${occupancy > 80 ? "bg-error" : occupancy > 60 ? "bg-warning" : "bg-success"}`}
-              style={{ width: `${occupancy}%` }}
+              className={`h-full ${icuOccupancy > 80 ? "bg-error" : icuOccupancy > 60 ? "bg-warning" : "bg-success"}`}
+              style={{ width: `${icuOccupancy}%` }}
             ></div>
           </div>
         </div>
@@ -307,7 +319,7 @@ export default function Dashboard() {
   const [aqiData, setAqiData] = useState<DashboardMetric | null>(null);
   const [aqiForecast, setAqiForecast] = useState<AQIForecastDay[]>([]);
   const [showAqiOverlay, setShowAqiOverlay] = useState(false);
-  
+
   const aqiWrapperRef = useRef<HTMLDivElement>(null);
 
   const toggleLanguage = () => {
@@ -333,7 +345,7 @@ export default function Dashboard() {
       if (!response.ok) throw new Error("Failed to fetch AQI data");
 
       const data = await response.json();
-      
+
       // 1. Process Current Data
       const currentAqiData = data.current.air_quality;
       const pm2_5 = currentAqiData.pm2_5;
@@ -346,7 +358,7 @@ export default function Dashboard() {
         label: t("air_quality_index") || "Air Quality Index",
         value: realAQI,
         unit: statusInfo.label,
-        trend: 0, 
+        trend: 0,
         status: statusInfo.status,
         icon: <Cloud className={`w-5 h-5 text-${statusInfo.status}`} />,
       });
@@ -358,7 +370,7 @@ export default function Dashboard() {
         const fPm25 = fAqi.pm2_5 || pm2_5;
         const variation = (Math.random() * 20) - 10;
         const fRealAQI = calculateRealAQI(Math.max(0, fPm25 + variation));
-        
+
         let fStatus: "success" | "warning" | "error" | "neutral" = "neutral";
         let fLabel = "Unknown";
         if (fRealAQI <= 50) { fStatus = "success"; fLabel = "Good"; }
@@ -377,7 +389,7 @@ export default function Dashboard() {
           label: fLabel
         };
       });
-      
+
       setAqiForecast(forecastDays);
 
     } catch (error) {
@@ -483,18 +495,17 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center gap-3 flex-wrap">
-                
+
                 {/* --- AQI DROPDOWN --- */}
                 {aqiData && (
                   <div className="relative" ref={aqiWrapperRef}>
-                    <button 
+                    <button
                       onClick={() => setShowAqiOverlay(!showAqiOverlay)}
-                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all hover:shadow-sm ${
-                        aqiData.status === 'success' ? 'bg-success/10 border-success/20 text-success' :
-                        aqiData.status === 'warning' ? 'bg-warning/10 border-warning/20 text-warning' :
-                        aqiData.status === 'error' ? 'bg-error/10 border-error/20 text-error' :
-                        'bg-muted border-border text-muted-foreground'
-                      }`}
+                      className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all hover:shadow-sm ${aqiData.status === 'success' ? 'bg-success/10 border-success/20 text-success' :
+                          aqiData.status === 'warning' ? 'bg-warning/10 border-warning/20 text-warning' :
+                            aqiData.status === 'error' ? 'bg-error/10 border-error/20 text-error' :
+                              'bg-muted border-border text-muted-foreground'
+                        }`}
                     >
                       <Cloud className="w-5 h-5" />
                       <span className="text-sm font-semibold">AQI: {aqiData.value}</span>
@@ -511,29 +522,27 @@ export default function Dashboard() {
                           </h4>
                           <span className="text-xs text-muted-foreground">Est. PM2.5</span>
                         </div>
-                        
+
                         <div className="space-y-3">
                           {aqiForecast.length > 0 ? (
                             aqiForecast.map((day, idx) => (
                               <div key={idx} className="flex items-center justify-between text-sm">
                                 <span className="w-10 font-medium text-muted-foreground">{day.dayName}</span>
-                                
+
                                 <div className="flex-1 mx-3 h-2 bg-muted rounded-full overflow-hidden">
-                                  <div 
-                                    className={`h-full rounded-full ${
-                                      day.status === 'success' ? 'bg-success' : 
-                                      day.status === 'warning' ? 'bg-warning' : 
-                                      day.status === 'error' ? 'bg-error' : 'bg-muted-foreground'
-                                    }`}
+                                  <div
+                                    className={`h-full rounded-full ${day.status === 'success' ? 'bg-success' :
+                                        day.status === 'warning' ? 'bg-warning' :
+                                          day.status === 'error' ? 'bg-error' : 'bg-muted-foreground'
+                                      }`}
                                     style={{ width: `${Math.min(100, (day.aqiValue / 300) * 100)}%` }}
                                   />
                                 </div>
-                                
-                                <span className={`font-bold w-8 text-right ${
-                                  day.status === 'success' ? 'text-success' : 
-                                  day.status === 'warning' ? 'text-warning' : 
-                                  day.status === 'error' ? 'text-error' : ''
-                                }`}>
+
+                                <span className={`font-bold w-8 text-right ${day.status === 'success' ? 'text-success' :
+                                    day.status === 'warning' ? 'text-warning' :
+                                      day.status === 'error' ? 'text-error' : ''
+                                  }`}>
                                   {day.aqiValue}
                                 </span>
                               </div>
@@ -542,7 +551,7 @@ export default function Dashboard() {
                             <p className="text-xs text-center text-muted-foreground py-2">Forecast data unavailable</p>
                           )}
                         </div>
-                        
+
                         <div className="mt-3 pt-2 border-t border-border text-xs text-center text-muted-foreground">
                           Based on seasonal weather patterns
                         </div>
@@ -561,7 +570,7 @@ export default function Dashboard() {
 
                 <button
                   onClick={() => {
-                    fetchAQI(); 
+                    fetchAQI();
                     setRefreshTime(new Date().toLocaleTimeString());
                   }}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-border hover:bg-muted transition-colors text-sm font-medium"
@@ -590,7 +599,7 @@ export default function Dashboard() {
         </div>
 
         {/* Main Content */}
-       {/* Main Content */}
+        {/* Main Content */}
         <div className="container mx-auto px-4 py-8">
 
 
@@ -785,7 +794,7 @@ export default function Dashboard() {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-[380px] overflow-y-auto pr-2 custom-scrollbar">
                   {hospitals.map((hospital) => (
-                    <HospitalNetworkCard key={hospital.name} {...hospital} />
+                    <HospitalNetworkCard key={hospital._id} {...hospital} />
                   ))}
                 </div>
               </div>
