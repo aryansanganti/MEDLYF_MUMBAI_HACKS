@@ -53,7 +53,7 @@ interface Hospital {
   name: string;
   city: string;
   icuOccupancy: number;
-  oxygenLevel: number;
+  oxygenSupply: string;
   status: string;
   icuBeds: number;
   latitude: number;
@@ -216,35 +216,57 @@ const HospitalNetworkCard = ({
   city,
   icuBeds,
   icuOccupancy,
-  oxygenLevel,
+  oxygenSupply,
   status: propStatus,
 }: {
   name: string;
   city: string;
   icuBeds: number;
   icuOccupancy: number;
-  oxygenLevel: number;
+  oxygenSupply: string;
   status?: string;
 }) => {
   const { t } = useTranslation();
 
-  let status: "critical" | "warning" | "good" = "good";
-  if (propStatus) {
-    if (propStatus === 'critical') status = 'critical';
-    else if (propStatus === 'warning') status = 'warning';
-    else status = 'good';
+  let status: "critical" | "low" | "stable" | "good" = "good";
+  let oxygenLevel = 0;
+
+  // Map string oxygenSupply to percentage and status
+  const supply = oxygenSupply?.toLowerCase() || "";
+
+  if (supply === "critical") {
+    status = "critical";
+    oxygenLevel = 15;
+  } else if (supply === "low") {
+    status = "low";
+    oxygenLevel = 35;
+  } else if (supply === "stable") {
+    status = "stable";
+    oxygenLevel = 70;
+  } else if (supply === "good") {
+    status = "good";
+    oxygenLevel = 95;
   } else {
-    if (icuOccupancy > 80 || oxygenLevel < 30) {
-      status = "critical";
-    } else if (icuOccupancy > 60 || oxygenLevel < 50) {
-      status = "warning";
+    // Fallback or if it happens to be a number string
+    const num = parseInt(supply);
+    if (!isNaN(num)) {
+      oxygenLevel = num;
+      if (num < 20) status = "critical";
+      else if (num < 40) status = "low";
+      else if (num < 70) status = "stable";
+      else status = "good";
+    } else {
+      // Default fallback
+      status = "good";
+      oxygenLevel = 95;
     }
   }
 
   const getStatusIcon = () => {
     switch (status) {
       case "critical": return <Building2 className="w-5 h-5 text-error" />;
-      case "warning": return <Building2 className="w-5 h-5 text-warning" />;
+      case "low": return <Building2 className="w-5 h-5 text-warning" />;
+      case "stable": return <Building2 className="w-5 h-5 text-blue-500" />;
       case "good": return <Building2 className="w-5 h-5 text-success" />;
     }
   };
@@ -252,7 +274,8 @@ const HospitalNetworkCard = ({
   const getStatusBg = () => {
     switch (status) {
       case "critical": return "bg-error/20";
-      case "warning": return "bg-warning/20";
+      case "low": return "bg-warning/20";
+      case "stable": return "bg-blue-500/20";
       case "good": return "bg-success/20";
     }
   };
@@ -293,7 +316,11 @@ const HospitalNetworkCard = ({
           </div>
           <div className="h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full ${oxygenLevel < 30 ? "bg-error" : oxygenLevel < 50 ? "bg-warning" : "bg-success"}`}
+              className={`h-full ${status === "critical" ? "bg-error" :
+                status === "low" ? "bg-warning" :
+                  status === "stable" ? "bg-blue-500" :
+                    "bg-success"
+                }`}
               style={{ width: `${oxygenLevel}%` }}
             ></div>
           </div>
@@ -457,7 +484,6 @@ export default function Dashboard() {
     );
   }
 
-  // --- MOCK DATA ---
   const icuData = [
     { name: "Occupied", value: 300, fill: "#ef4444" },
     { name: "Free", value: 153, fill: "#ff9564ff" },
@@ -502,9 +528,9 @@ export default function Dashboard() {
                     <button
                       onClick={() => setShowAqiOverlay(!showAqiOverlay)}
                       className={`flex items-center gap-2 px-4 py-2 rounded-lg border transition-all hover:shadow-sm ${aqiData.status === 'success' ? 'bg-success/10 border-success/20 text-success' :
-                          aqiData.status === 'warning' ? 'bg-warning/10 border-warning/20 text-warning' :
-                            aqiData.status === 'error' ? 'bg-error/10 border-error/20 text-error' :
-                              'bg-muted border-border text-muted-foreground'
+                        aqiData.status === 'warning' ? 'bg-warning/10 border-warning/20 text-warning' :
+                          aqiData.status === 'error' ? 'bg-error/10 border-error/20 text-error' :
+                            'bg-muted border-border text-muted-foreground'
                         }`}
                     >
                       <Cloud className="w-5 h-5" />
@@ -532,16 +558,16 @@ export default function Dashboard() {
                                 <div className="flex-1 mx-3 h-2 bg-muted rounded-full overflow-hidden">
                                   <div
                                     className={`h-full rounded-full ${day.status === 'success' ? 'bg-success' :
-                                        day.status === 'warning' ? 'bg-warning' :
-                                          day.status === 'error' ? 'bg-error' : 'bg-muted-foreground'
+                                      day.status === 'warning' ? 'bg-warning' :
+                                        day.status === 'error' ? 'bg-error' : 'bg-muted-foreground'
                                       }`}
                                     style={{ width: `${Math.min(100, (day.aqiValue / 300) * 100)}%` }}
                                   />
                                 </div>
 
                                 <span className={`font-bold w-8 text-right ${day.status === 'success' ? 'text-success' :
-                                    day.status === 'warning' ? 'text-warning' :
-                                      day.status === 'error' ? 'text-error' : ''
+                                  day.status === 'warning' ? 'text-warning' :
+                                    day.status === 'error' ? 'text-error' : ''
                                   }`}>
                                   {day.aqiValue}
                                 </span>
