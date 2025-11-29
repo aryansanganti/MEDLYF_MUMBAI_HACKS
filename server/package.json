@@ -16,9 +16,12 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^3.0.4",
     "moment": "^2.30.1",
     "mongoose": "^9.0.0",
     "nodemon": "^3.1.11",
+    "pdfkit": "^0.17.2",
     "socket.io": "^4.8.1",
     "twilio": "^5.10.6"
   }
