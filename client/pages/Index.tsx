@@ -1,6 +1,9 @@
+// Index.tsx (Complete Single File - Must be run alongside the Node.js server)
+
 import { Link } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { useAuth } from "@/contexts/AuthContext";
+import React, { useState, useRef, useEffect, useCallback } from 'react'; // Added React imports for Chatbot
 import {
   Database,
   TrendingUp,
@@ -13,7 +16,208 @@ import {
   Users,
   Shield,
   Globe,
+  Bot,
+  User,
+  Send,
+  X,
+  Loader2,
 } from "lucide-react";
+
+// Assuming you have placeholder components for UI elements (adjust paths if needed)
+// Replace these with your actual UI component imports (e.g., shadcn/ui)
+const Button = ({ children, onClick, type, disabled, size, className, title }: any) => (
+  <button onClick={onClick} type={type} disabled={disabled} className={`p-2 rounded-lg ${className}`} title={title}>{children}</button>
+);
+const Textarea = (props: any) => (
+  <textarea {...props} className={`border border-border p-2 rounded-lg w-full ${props.className}`} />
+);
+
+
+// --- START CHATBOT COMPONENTS ---
+
+type Message = {
+  id: number;
+  sender: 'user' | 'bot';
+  text: string | React.ReactNode;
+};
+
+// ** NOTE: This function calls your secure backend server running on port 3001 **
+const fetchBotResponse = async (query: string): Promise<string> => {
+  const isNewsQuery = query.toLowerCase().includes('news') || query.toLowerCase().includes('healthcare update');
+  const isDataQuery = query.toLowerCase().includes('outbreak') || query.toLowerCase().includes('patient') || query.toLowerCase().includes('cases');
+
+  let endpoint = '';
+  if (isNewsQuery) {
+    endpoint = 'http://localhost:3001/api/chatbot/news';
+  } else if (isDataQuery) {
+    endpoint = 'http://localhost:3001/api/chatbot/data';
+  } else {
+    // Default to a general query endpoint that the backend can handle
+    endpoint = 'http://localhost:3001/api/chatbot/data';
+  }
+
+  try {
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Backend call failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data.response || "Sorry, the server returned an empty response.";
+
+  } catch (error) {
+    console.error("Chatbot API Error:", error);
+    return "Error: Could not connect to the backend service (http://localhost:3001). Check if the server.js is running.";
+  }
+};
+
+const ChatMessage = ({ message }: { message: Message }) => {
+  const isUser = message.sender === 'user';
+  return (
+    <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div className={`flex items-start max-w-[75%] gap-2 ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+        <div className={`p-2 rounded-full ${isUser ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+          {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+        </div>
+        <div className={`p-3 rounded-xl shadow-md text-sm whitespace-pre-line ${isUser ? 'bg-primary/90 text-white rounded-tr-none' : 'bg-background border border-border rounded-tl-none'}`}>
+          {message.text}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const Chatbot = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(scrollToBottom, [messages]);
+
+  const welcomeMessage = useCallback(() => {
+    setMessages([{
+      id: Date.now(),
+      sender: 'bot',
+      text: (
+        <>
+          Hello! I'm Medlyf AI Assistant, powered by Sarvam AI and your system data. How can I help?
+          <br /><br />
+          Try asking:
+          <ul className="list-disc list-inside mt-2">
+            <li>"What is the latest healthcare news?"</li>
+            <li>"Report on active outbreaks." (Queries MongoDB)</li>
+          </ul>
+        </>
+      )
+    }]);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      welcomeMessage();
+    }
+  }, [isOpen, messages.length, welcomeMessage]);
+
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const userQuery = input.trim();
+    if (!userQuery) return;
+
+    const newUserMessage: Message = { id: Date.now(), sender: 'user', text: userQuery };
+    setMessages(prev => [...prev, newUserMessage]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const botResponseText = await fetchBotResponse(userQuery);
+      const newBotMessage: Message = { id: Date.now() + 1, sender: 'bot', text: botResponseText };
+      setMessages(prev => [...prev, newBotMessage]);
+    } catch (error) {
+      const errorMessage: Message = { id: Date.now() + 1, sender: 'bot', text: 'An unexpected error occurred. Check the console.' };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!isOpen) {
+    return (
+      <button
+        onClick={() => setIsOpen(true)}
+        className="fixed bottom-6 right-6 p-4 rounded-full bg-primary text-primary-foreground shadow-lg hover:shadow-xl transition-all z-[1000]"
+        title="Open Chatbot"
+      >
+        <Bot className="w-6 h-6" />
+      </button>
+    );
+  }
+
+  return (
+    <div className="fixed bottom-6 right-6 w-full max-w-sm h-[80vh] max-h-[600px] bg-card border border-border rounded-xl shadow-2xl flex flex-col z-[1000]">
+      {/* Header */}
+      <div className="flex justify-between items-center p-4 border-b border-border bg-gradient-to-r from-primary/10 to-secondary/10 rounded-t-xl">
+        <h3 className="font-bold text-lg flex items-center gap-2">
+          <Zap className="w-5 h-5 text-primary" /> Medlyf AI Assistant
+        </h3>
+        <button
+          onClick={() => setIsOpen(false)}
+          className="p-2 rounded-full hover:bg-muted transition-colors"
+          title="Close Chatbot"
+        >
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-grow p-4 overflow-y-auto space-y-4">
+        {messages.map(msg => <ChatMessage key={msg.id} message={msg} />)}
+        {isLoading && (
+          <div className="flex justify-start mb-4">
+            <div className="flex items-start max-w-[75%] gap-2">
+              <div className="p-2 rounded-full bg-muted text-muted-foreground">
+                <Bot className="w-4 h-4" />
+              </div>
+              <div className="p-3 rounded-xl shadow-md text-sm bg-background border border-border rounded-tl-none">
+                <Loader2 className="w-4 h-4 animate-spin inline mr-2" /> Typing...
+              </div>
+            </div>
+          </div>
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* Input */}
+      <form onSubmit={handleSend} className="p-4 border-t border-border">
+        <div className="flex gap-2">
+          <Textarea
+            value={input}
+            onChange={(e: any) => setInput(e.target.value)}
+            placeholder="Ask about news or patient data..."
+            className="flex-grow resize-none"
+            rows={1}
+            disabled={isLoading}
+          />
+          <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+            <Send className="w-5 h-5" />
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+// --- END CHATBOT COMPONENTS ---
 
 const Agent = ({
   icon: Icon,
@@ -58,7 +262,7 @@ const Feature = ({
 );
 
 export default function Index() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth(); // Assuming useAuth() is available
 
   return (
     <Layout authenticated={false}>
@@ -118,33 +322,33 @@ export default function Index() {
 
             <div className="relative hidden lg:block">
               <div className="rounded-2xl border border-border overflow-hidden bg-gradient-to-br from-primary/10 to-secondary/10 p-8">
-              <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="space-y-3">
-                <div className="h-3 bg-primary/30 rounded-full"></div>
-                <div className="h-3 bg-secondary/25 rounded-full w-4/5"></div>
-                <div className="h-3 bg-accent/20 rounded-full w-3/5"></div>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="space-y-3">
+                    <div className="h-3 bg-primary/30 rounded-full"></div>
+                    <div className="h-3 bg-secondary/25 rounded-full w-4/5"></div>
+                    <div className="h-3 bg-accent/20 rounded-full w-3/5"></div>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-success/30 to-primary/30 flex items-center justify-center">
+                      <Brain className="w-8 h-8 text-primary" />
+                    </div>
+                  </div>
                 </div>
-                <div className="flex items-center justify-center">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-success/30 to-primary/30 flex items-center justify-center">
-                  <Brain className="w-8 h-8 text-primary" />
+
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center p-2 bg-white/30 dark:bg-white/10 rounded-lg">
+                    <span className="text-xs text-muted-foreground">ICU Capacity</span>
+                    <span className="text-sm font-bold text-success">78%</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-white/30 dark:bg-white/10 rounded-lg">
+                    <span className="text-xs text-muted-foreground">Oxygen Supply</span>
+                    <span className="text-sm font-bold text-warning">92%</span>
+                  </div>
+                  <div className="flex justify-between items-center p-2 bg-white/30 dark:bg-white/10 rounded-lg">
+                    <span className="text-xs text-muted-foreground">Predictions Active</span>
+                    <span className="text-sm font-bold text-primary">24/7</span>
+                  </div>
                 </div>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between items-center p-2 bg-white/30 dark:bg-white/10 rounded-lg">
-                <span className="text-xs text-muted-foreground">ICU Capacity</span>
-                <span className="text-sm font-bold text-success">78%</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white/30 dark:bg-white/10 rounded-lg">
-                <span className="text-xs text-muted-foreground">Oxygen Supply</span>
-                <span className="text-sm font-bold text-warning">92%</span>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-white/30 dark:bg-white/10 rounded-lg">
-                <span className="text-xs text-muted-foreground">Predictions Active</span>
-                <span className="text-sm font-bold text-primary">24/7</span>
-                </div>
-              </div>
               </div>
             </div>
           </div>
@@ -321,6 +525,17 @@ export default function Index() {
           </div>
         </div>
       </section>
+
+      {/* CHATBOT INTEGRATION */}
+      <Chatbot />
+
     </Layout>
   );
 }
+
+// NOTE: You will need to ensure the following dummy components/context are defined elsewhere:
+// - Layout component
+// - useAuth hook
+// - Link component from react-router-dom
+// - Tailwind CSS classes like 'border-border', 'bg-card', 'text-muted-foreground', etc. are defined.
+// - The "custom-scrollbar" class for the messages div in Chatbot
