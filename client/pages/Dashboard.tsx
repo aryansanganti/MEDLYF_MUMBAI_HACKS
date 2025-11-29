@@ -38,19 +38,16 @@ import {
 } from "recharts";
 import OptimizationPanel from "./Optimization";
 
-// --- AQI API Constants ---
-// NOTE: ⚠️ REPLACE 'YOUR_ACTUAL_OPENWEATHERMAP_API_KEY' with your real key.
-const OPENWEATHER_API_KEY = "caf0c12698e8da12149be681c389a77c";
-// Coordinates for Pune, India (can be changed)
-const LATITUDE = 18.5204;
-const LONGITUDE = 73.8567;
-const AQI_API_URL = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${LATITUDE}&lon=${LONGITUDE}&appid=${OPENWEATHER_API_KEY}`;
-// -------------------------
+// --- WEATHER API CONFIGURATION ---
+const WEATHERAPI_KEY = "b81378cf6cb84db5b41230215252811";
+const LATITUDE = 18.9582;
+const LONGITUDE = 72.8321;
 
+const WEATHER_API_URL = `https://api.weatherapi.com/v1/forecast.json?key=${WEATHERAPI_KEY}&q=${LATITUDE},${LONGITUDE}&days=8&aqi=yes&alerts=no`;
+  
 
 const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
 const apiUrl = (isLocal ? "http://localhost:5001" : (import.meta.env.VITE_API_URL || "http://localhost:5001")).replace(/\/$/, "");
-const WEATHERAPI_KEY = "b81378cf6cb84db5b41230215252811";
 interface Hospital {
   name: string;
   city: string;
